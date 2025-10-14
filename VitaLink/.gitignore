@@ -1,0 +1,5 @@
+/bin
+/obj
+*.pdb
+[Dd]ebug/
+[Rr]elease/

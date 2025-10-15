@@ -23,11 +23,13 @@ jobs:
         with:
           dotnet-version: '8.x'
 
+      # 👇 حدّد هنا المسار الصحيح لملف مشروعك .csproj
+      # مثال: لو مشروعك داخل فولدر اسمه "VitaLink" والملف اسمه "VitaLink.csproj"
       - name: Build with dotnet
-        run: dotnet build --configuration Release
+        run: dotnet build ./VitaLink/VitaLink.csproj --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+        run: dotnet publish ./VitaLink/VitaLink.csproj -c Release -o "${{env.DOTNET_ROOT}}/myapp"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -39,8 +41,8 @@ jobs:
     runs-on: windows-latest
     needs: build
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write
+      contents: read
 
     steps:
       - name: Download artifact from build job
@@ -62,4 +64,3 @@ jobs:
           app-name: 'VitaLink20251014200825'
           slot-name: 'Production'
           package: .
-          

@@ -1,4 +1,3 @@
-
 using Microsoft.EntityFrameworkCore;
 using VitaLink.Models.Data;
 
@@ -16,11 +15,13 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
+// *************************************************************
+// ** تم إزالة شرط (if (app.Environment.IsDevelopment())) **
+// ** للسماح بظهور Swagger UI في بيئة Azure للاختبار **
+// *************************************************************
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 ﻿using Microsoft.EntityFrameworkCore;
+=======
+using Microsoft.EntityFrameworkCore;
+>>>>>>> f9dd3a322560d5dc782b3c9608d857083d9fee7e
 using VitaLink.Models.Data;
 
 var builder = WebApplication.CreateBuilder(args);

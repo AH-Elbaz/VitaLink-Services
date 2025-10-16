@@ -21,5 +21,18 @@ namespace VitaLink.Models.Data
         public DbSet<AIRecommendation> AIRecommendations { get; set; }
 
         public DbSet<SessionSummary> SessionSummaries { get; set; }
+
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // تأكيد العلاقة بين الرياضي والتوكن
+            modelBuilder.Entity<AthleteProfile>()
+                .HasMany(a => a.RefreshTokens)
+                .WithOne(t => t.Athlete)
+                .HasForeignKey(t => t.AthleteID);
+
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }

@@ -10,7 +10,11 @@ namespace Vitalink.Models
 
         [Required]
         public string FirstName { get; set; }
+
+        [Required]
+        public string PasswordHash { get; set; } = null!;
         public string LastName { get; set; }
+        public int Role { get; set; } = 0;
 
         public DateTime BirthDate { get; set; }
         public double Weight { get; set; } // كجم
@@ -20,5 +24,6 @@ namespace Vitalink.Models
 
         // خاصية للملاحة (Navigation Property) لربط الرياضي بجلساته
         public ICollection<TrainingSession> TrainingSessions { get; set; } = new List<TrainingSession>();
+        public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     }
 }

@@ -29,6 +29,18 @@ builder.Services.AddDbContext<VitalinkDbContext>(options =>
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins",
+        builder =>
+        {
+            builder.AllowAnyOrigin()    // يسمح بالوصول من أي نطاق/دومين (*)
+                   .AllowAnyMethod()    // يسمح بجميع الأفعال (GET, POST, PUT, إلخ)
+                   .AllowAnyHeader();   // يسمح بجميع رؤوس الطلبات (Headers)
+                                        // .AllowCredentials(); // NOTE: لا تستخدم AllowAnyOrigin() مع AllowCredentials() لأسباب أمنية
+        });
+});
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -56,6 +68,7 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
+app.UseCors("AllowAllOrigins");
 app.UseSwagger();
 app.UseSwaggerUI();
 

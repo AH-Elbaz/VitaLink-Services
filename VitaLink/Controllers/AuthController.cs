@@ -2,7 +2,9 @@
 using Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Vitalink.API.Dtos;
 using Vitalink.API.Services;
+using Vitalink.Models;
 using VitaLink.Models.Data;
 
 namespace Vitalink.API.Controllers
@@ -41,6 +43,50 @@ namespace Vitalink.API.Controllers
             // إرجاع الاستجابة المطلوبة
             var responseDto = _tokenService.CreateTokenResponseDto(athlete, accessToken, refreshToken);
             return Ok(responseDto);
+        }
+
+
+        [HttpPost("register")]
+        [ProducesResponseType(typeof(AthleteProfile), 201)] 
+        [ProducesResponseType(401)]
+        public async Task<ActionResult<AthleteProfile>> Register([FromBody] RegisterDto registerDto)
+        {
+         
+            var existingUser = await _context.AthleteProfiles
+                .AnyAsync(a => a.FirstName == registerDto.FirstName);
+
+            if (existingUser)
+            {
+               
+                return BadRequest(new { Message = "Username (FirstName) is already taken." });
+            }
+
+       
+            string passwordHash = _tokenService.HashPassword(registerDto.Password);
+
+           
+            var newAthlete = new AthleteProfile
+            {
+                AthleteID = Guid.NewGuid().ToString(),
+                FirstName = registerDto.FirstName,
+                LastName = registerDto.LastName,
+                PasswordHash = passwordHash, 
+                Role = 0,
+
+              
+                BirthDate = registerDto.BirthDate,
+                Weight = registerDto.Weight,
+                BodyFatPercentage = registerDto.BodyFatPercentage,
+                BloodType = registerDto.BloodType,
+                TargetSport = registerDto.TargetSport,
+            };
+
+           
+            _context.AthleteProfiles.Add(newAthlete);
+            await _context.SaveChangesAsync();
+
+        
+            return CreatedAtAction(nameof(Login), new { username = newAthlete.FirstName }, newAthlete);
         }
     }
 }

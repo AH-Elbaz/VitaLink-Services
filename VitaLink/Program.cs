@@ -1,15 +1,15 @@
-using BCrypt.Net;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
-using System.Text;// تأكد من أن هذا هو مسار DbContext الصحيح
-using Vitalink.API.Hubs; // يجب استيراد Hubs هنا // لاستخدام النماذج
+using System.Text;
 using Vitalink.API.Services;
-using VitaLink.Models.Data;
-// --------------------------------------------------------------------------------------
-// ملاحظة: تم إزالة دالة GenerateCorrectHash() من هنا لمنع أخطاء التجميع.
-// --------------------------------------------------------------------------------------
+using Vitalink.API.Data; // تأكد من أن هذا هو مسار DbContext الصحيح
+using Vitalink.API.Hubs; // يجب استيراد Hubs هنا 
+using BCrypt.Net; 
+using Vitalink.API.Models; // لاستخدام النماذج
+using Microsoft.AspNetCore.SignalR; // لخدمات SignalR
+using Microsoft.Extensions.Logging; // ILogger
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,20 +33,20 @@ builder.Services.AddDbContext<VitalinkDbContext>(options =>
 builder.Services.AddScoped<ITokenService, TokenService>();
 
 // ** 1.3. تسجيل خدمة SignalR Hubs **
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(); 
 
 
-// 1.4. تكوين CORS (السماح لأي نطاق في بيئة التطوير)
+// 1.4. تكوين CORS (للسماح بالوصول العام الآمن)
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllOrigins",
+    options.AddPolicy("AllowAllOrigins", // اسم السياسة التي تستخدمها
         builder =>
         {
-            // تمكين AllowCredentials للسماح لـ SignalR بنقل بيانات المصادقة عبر WebSockets
-            builder.AllowAnyOrigin()
+            // الحل النهائي لـ CORS: SetIsOriginAllowed يسمح بالوصول العام ويحل مشكلة التعارض مع AllowCredentials
+            builder.SetIsOriginAllowed(origin => true)
                    .AllowAnyMethod()
                    .AllowAnyHeader()
-                   .AllowCredentials(); // ضروري لـ SignalR Hubs
+                   .AllowCredentials(); // ضروري لـ SignalR وتمرير التوكنات
         });
 });
 
@@ -95,7 +95,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // 2.4. تعيين مسارات الـ Hubs والـ Controllers
-app.MapControllers();
+app.MapControllers(); 
 app.MapHub<SensorDataHub>("/sensorhub"); // <--- المسار المطلوب لـ WebSocket Hub
 
 app.Run();

@@ -1,15 +1,15 @@
+using BCrypt.Net;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.SignalR; // لخدمات SignalR
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging; // ILogger
 using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
 using System.Text;
-using Vitalink.API.Services;
-using Vitalink.API.Data; // تأكد من أن هذا هو مسار DbContext الصحيح
+using VitaLink.Models.Data; // تأكد من أن هذا هو مسار DbContext الصحيح
 using Vitalink.API.Hubs; // يجب استيراد Hubs هنا 
-using BCrypt.Net; 
-using Vitalink.API.Models; // لاستخدام النماذج
-using Microsoft.AspNetCore.SignalR; // لخدمات SignalR
-using Microsoft.Extensions.Logging; // ILogger
+using Vitalink.Models; // لاستخدام النماذج
+using Vitalink.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +33,7 @@ builder.Services.AddDbContext<VitalinkDbContext>(options =>
 builder.Services.AddScoped<ITokenService, TokenService>();
 
 // ** 1.3. تسجيل خدمة SignalR Hubs **
-builder.Services.AddSignalR(); 
+builder.Services.AddSignalR();
 
 
 // 1.4. تكوين CORS (للسماح بالوصول العام الآمن)
@@ -95,7 +95,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // 2.4. تعيين مسارات الـ Hubs والـ Controllers
-app.MapControllers(); 
+app.MapControllers();
 app.MapHub<SensorDataHub>("/sensorhub"); // <--- المسار المطلوب لـ WebSocket Hub
 
 app.Run();

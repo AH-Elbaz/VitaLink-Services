@@ -39,6 +39,7 @@ namespace Vitalink.API.Hubs
         // يجب أن تتأكد من أن حمولة ESP32 (SensorDataDto) تحتوي على خاصية BeltID
         public async Task SendSensorData(SensorDataDto data)
         {
+<<<<<<< HEAD
             var incomingBeltId = data.BeltID; // استخراج BeltID المرسل من ESP32
 
             if (string.IsNullOrEmpty(incomingBeltId))
@@ -46,6 +47,13 @@ namespace Vitalink.API.Hubs
                 Debug.WriteLine("[ERROR] Received data with null or empty BeltID.");
                 return;
             }
+=======
+            // ----------------------------------------------------
+            // 1. التحقق من وجود البيانات الأساسية (Presence Check)
+            // ----------------------------------------------------
+            // HeartRate هو الحقل الوحيد المحدد كـ [Required] في الـ DTO الخاص بك.
+         
+>>>>>>> 6270a90753d327e77c2102f1cb2064ec1aec4f58
 
             // 1. البحث في قاعدة البيانات عن المستخدم المرتبط بهذا الحزام
             var athlete = await _dbContext.AthleteProfiles

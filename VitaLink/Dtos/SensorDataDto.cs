@@ -4,13 +4,9 @@ namespace Vitalink.API.Dtos
 {
     public class SensorDataDto
     {
-       
-        //[Required]
-        //public string AthleteID { get; set; } = null!;
 
-        //[Required]
-        //public DateTime Timestamp { get; set; } = DateTime.UtcNow;
-
+        [Required]
+        public string BeltID { get; set; }
 
   
         [Required]

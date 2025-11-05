@@ -74,6 +74,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddSingleton<ConnectionTracker>();
 
 // --------------------------------------------------------------------------------------
 // 2. HTTP REQUEST PIPELINE (MIDDLEWARE)

@@ -1,61 +1,89 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 using Vitalink.API.Dtos;
-using System.Diagnostics; // للحصول على Debug.WriteLine
+using Vitalink.API.Services;
+using VitaLink.Models.Data;
 
 namespace Vitalink.API.Hubs
 {
-    /// <summary>
-    /// مركز بيانات الحساسات (Hub)
-    /// مسؤول عن استقبال بيانات WebSockets من المتحكمات الدقيقة وبثها للواجهة الأمامية.
-    /// </summary>
+    // نفترض أن SensorDataDto يحتوي على خاصية BeltID
     public class SensorDataHub : Hub
     {
+        private readonly ConnectionTracker _tracker;
+        private readonly VitalinkDbContext _dbContext; // للوصول لقاعدة البيانات
 
+        public SensorDataHub(ConnectionTracker tracker, VitalinkDbContext dbContext)
+        {
+            _tracker = tracker;
+            _dbContext = dbContext;
+        }
+
+        // ***************************************************************
+        // 1. وظيفة تسجيل الاتصال (يتم استدعاؤها من الواجهة الأمامية)
+        // ***************************************************************
+
+        // يتم استدعاؤها من Frontend فور تسجيل الدخول بنجاح
+        // 'username' في هذه الحالة هو الـ FirstName الذي تستخدمه للمصادقة
+        public async Task RegisterConnection(string username)
+        {
+            // حفظ الربط بين اسم المستخدم ومعرف الاتصال الحالي في التراكر
+            _tracker.AddConnection(username, Context.ConnectionId);
+            Debug.WriteLine($"[CONNECTION] User {username} registered ID: {Context.ConnectionId}");
+        }
+
+        // ***************************************************************
+        // 2. وظيفة استقبال وتوجيه بيانات الحزام (يتم استدعاؤها من ESP32)
+        // ***************************************************************
+
+        // يجب أن تتأكد من أن حمولة ESP32 (SensorDataDto) تحتوي على خاصية BeltID
         public async Task SendSensorData(SensorDataDto data)
         {
-            // ----------------------------------------------------
-            // 1. التحقق من وجود البيانات الأساسية (Presence Check)
-            // ----------------------------------------------------
-            // HeartRate هو الحقل الوحيد المحدد كـ [Required] في الـ DTO الخاص بك.
+            var incomingBeltId = data.BeltID; // استخراج BeltID المرسل من ESP32
 
+            if (string.IsNullOrEmpty(incomingBeltId))
+            {
+                Debug.WriteLine("[ERROR] Received data with null or empty BeltID.");
+                return;
+            }
 
-            // ----------------------------------------------------
-            // 2. طباعة جميع البيانات في الكونسول (للتأكد من وصولها كاملاً)
-            // ----------------------------------------------------
+            // 1. البحث في قاعدة البيانات عن المستخدم المرتبط بهذا الحزام
+            var athlete = await _dbContext.AthleteProfiles
+                                          .Where(a => a.BeltID == incomingBeltId)
+                                          .Select(a => a.FirstName) // اختيار الـ Username (الـ FirstName)
+                                          .FirstOrDefaultAsync();
 
-            Debug.WriteLine("================ VITALINK SENSOR DATA RECEIVED ================");
-            // تم حذف AthleteID و Timestamp من الطباعة لأنها غير موجودة حالياً في الـ DTO
+            if (athlete != null)
+            {
+                // 2. الحصول على الـ ConnectionID النشط حالياً للمستخدم
+                var targetConnectionId = _tracker.GetConnectionId(athlete);
 
-            Debug.WriteLine($"- Heart Rate (HR): {data.HeartRate:F1} BPM");
-            Debug.WriteLine($"- Oxygen Saturation (SpO2): {data.Spo2}%");
-            Debug.WriteLine($"- Temperature (Temp): {data.Temperature:F2}°C");
-
-            Debug.WriteLine($"- Motion (Acc): X={data.AccX:F2}, Y={data.AccY:F2}, Z={data.AccZ:F2}");
-            Debug.WriteLine($"- Sweat Level: {data.Sweat}");
-            Debug.WriteLine("===============================================================");
-
-            // ----------------------------------------------------
-            // 3. البث الفوري للعملاء (الواجهة الأمامية)
-            // ----------------------------------------------------
-            // "ReceiveLiveUpdate" هو اسم الدالة التي يستمع إليها Frontend
-            await Clients.All.SendAsync("ReceiveLiveUpdate", data);
+                if (targetConnectionId != null)
+                {
+                    // 3. توجيه البيانات مباشرة إلى اتصال المستخدم المحدد
+                    await Clients.Client(targetConnectionId).SendAsync("ReceiveLiveUpdate", data);
+                    Debug.WriteLine($"[STREAM] Data routed from {incomingBeltId} to user {athlete} via {targetConnectionId}");
+                }
+                else
+                {
+                    Debug.WriteLine($"[WARNING] Data received for {athlete} but dashboard is not connected.");
+                }
+            }
+            else
+            {
+                Debug.WriteLine($"[WARNING] Data received from unknown BeltID: {incomingBeltId}. Ignoring.");
+            }
         }
 
-        /// <summary>
-        /// يُستدعى عند إنشاء اتصال WebSocket جديد
-        /// </summary>
-        public override async Task OnConnectedAsync()
-        {
-            Debug.WriteLine($"Client connected: {Context.ConnectionId}");
-            await base.OnConnectedAsync();
-        }
+        // ***************************************************************
+        // 3. تتبع الانقطاع (لإزالة الاتصال)
+        // ***************************************************************
 
-        /// <summary>
-        /// يُستدعى عند انقطاع اتصال WebSocket
-        /// </summary>
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            Debug.WriteLine($"Client disconnected: {Context.ConnectionId}");
+            // إزالة الـ ConnectionId من التراكر عند انقطاع الاتصال (مهم جداً!)
+            _tracker.RemoveConnection(Context.ConnectionId);
+            Debug.WriteLine($"[DISCONNECT] Connection ID {Context.ConnectionId} removed.");
             await base.OnDisconnectedAsync(exception);
         }
     }

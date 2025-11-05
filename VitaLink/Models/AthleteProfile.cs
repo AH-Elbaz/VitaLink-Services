@@ -15,7 +15,6 @@ namespace Vitalink.Models
         public string PasswordHash { get; set; } = null!;
         public string LastName { get; set; }
         public int Role { get; set; } = 0;
-
         public DateTime BirthDate { get; set; }
         public double Weight { get; set; } // كجم
         public string BloodType { get; set; }

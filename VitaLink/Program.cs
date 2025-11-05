@@ -1,15 +1,15 @@
-using BCrypt.Net; // يجب استيراد BCrypt بشكل صحيح
+using BCrypt.Net;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.SignalR; // لخدمات SignalR
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging; // ILogger
 using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
-using System.Text; // لاستخدام النماذج
+using System.Text;
+using VitaLink.Models.Data; // تأكد من أن هذا هو مسار DbContext الصحيح
+using Vitalink.API.Hubs; // يجب استيراد Hubs هنا 
+using Vitalink.Models; // لاستخدام النماذج
 using Vitalink.API.Services;
-using VitaLink.Models.Data;
-// --------------------------------------------------------------------------------------
-// ملاحظة: تم إزالة دالة GenerateCorrectHash() من هنا ونقلها إلى Service أو Controller
-// لمنع أخطاء التجميع/البناء (Compilation Errors)، حيث لا يمكن وضعها في هذا المكان.
-// --------------------------------------------------------------------------------------
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,16 +32,21 @@ builder.Services.AddDbContext<VitalinkDbContext>(options =>
 // 1.2. تسجيل خدمة التوكن (JWT Service)
 builder.Services.AddScoped<ITokenService, TokenService>();
 
-// 1.3. تكوين CORS (السماح لأي نطاق في بيئة التطوير)
+// ** 1.3. تسجيل خدمة SignalR Hubs **
+builder.Services.AddSignalR();
+
+
+// 1.4. تكوين CORS (للسماح بالوصول العام الآمن)
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllOrigins",
+    options.AddPolicy("AllowAllOrigins", // اسم السياسة التي تستخدمها
         builder =>
         {
-            // تحذير: هذا الخيار غير آمن للإنتاج، لكنه يحل مشكلة CORS مؤقتاً.
-            builder.AllowAnyOrigin()
+            // الحل النهائي لـ CORS: SetIsOriginAllowed يسمح بالوصول العام ويحل مشكلة التعارض مع AllowCredentials
+            builder.SetIsOriginAllowed(origin => true)
                    .AllowAnyMethod()
-                   .AllowAnyHeader();
+                   .AllowAnyHeader()
+                   .AllowCredentials(); // ضروري لـ SignalR وتمرير التوكنات
         });
 });
 
@@ -50,7 +55,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 
-// 1.4. تكوين خدمة مصادقة JWT
+// 1.5. تكوين خدمة مصادقة JWT
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -89,6 +94,8 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// 2.4. تعيين مسارات الـ Hubs والـ Controllers
 app.MapControllers();
+app.MapHub<SensorDataHub>("/sensorhub"); // <--- المسار المطلوب لـ WebSocket Hub
 
 app.Run();

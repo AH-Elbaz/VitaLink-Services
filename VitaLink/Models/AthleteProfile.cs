@@ -22,6 +22,8 @@ namespace Vitalink.Models
         public double BodyFatPercentage { get; set; }
         public string TargetSport { get; set; }
 
+        public string? BeltID { get; set; }
+
         // خاصية للملاحة (Navigation Property) لربط الرياضي بجلساته
         public ICollection<TrainingSession> TrainingSessions { get; set; } = new List<TrainingSession>();
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();

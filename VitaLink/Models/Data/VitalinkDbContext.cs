@@ -24,8 +24,17 @@ namespace VitaLink.Models.Data
 
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<AthleteProfile>()
+            .HasIndex(a => a.BeltID)
+            .IsUnique();
+
+            modelBuilder.Entity<AthleteProfile>()
+            .HasMany(a => a.RefreshTokens)
+            .WithOne(t => t.Athlete)
+            .HasForeignKey(t => t.AthleteID);
             // تأكيد العلاقة بين الرياضي والتوكن
             modelBuilder.Entity<AthleteProfile>()
                 .HasMany(a => a.RefreshTokens)

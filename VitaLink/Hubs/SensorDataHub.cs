@@ -17,11 +17,7 @@ namespace Vitalink.API.Hubs
             // 1. التحقق من وجود البيانات الأساسية (Presence Check)
             // ----------------------------------------------------
             // HeartRate هو الحقل الوحيد المحدد كـ [Required] في الـ DTO الخاص بك.
-            if (data.HeartRate == 0)
-            {
-                Debug.WriteLine("[ERROR] Received incomplete sensor packet. Missing HeartRate.");
-                return; // إيقاف العملية إذا كان معدل ضربات القلب مفقوداً أو صفراً
-            }
+
 
             // ----------------------------------------------------
             // 2. طباعة جميع البيانات في الكونسول (للتأكد من وصولها كاملاً)

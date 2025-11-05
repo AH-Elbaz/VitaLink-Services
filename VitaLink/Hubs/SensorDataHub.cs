@@ -1,18 +1,21 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿// ملف: Hubs/SensorDataHub.cs
+
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
+using System.Security.Claims; // للحصول على الهوية
 using Vitalink.API.Dtos;
 using Vitalink.API.Services;
 using VitaLink.Models.Data;
 
 namespace Vitalink.API.Hubs
 {
-    // نفترض أن SensorDataDto يحتوي على خاصية BeltID
     public class SensorDataHub : Hub
     {
         private readonly ConnectionTracker _tracker;
-        private readonly VitalinkDbContext _dbContext; // للوصول لقاعدة البيانات
+        private readonly VitalinkDbContext _dbContext; // للوصول لقاعدة البيانات وربط BeltID بالـ Username
 
+        // حقن الخدمات المطلوبة
         public SensorDataHub(ConnectionTracker tracker, VitalinkDbContext dbContext)
         {
             _tracker = tracker;
@@ -23,8 +26,6 @@ namespace Vitalink.API.Hubs
         // 1. وظيفة تسجيل الاتصال (يتم استدعاؤها من الواجهة الأمامية)
         // ***************************************************************
 
-        // يتم استدعاؤها من Frontend فور تسجيل الدخول بنجاح
-        // 'username' في هذه الحالة هو الـ FirstName الذي تستخدمه للمصادقة
         public async Task RegisterConnection(string username)
         {
             // حفظ الربط بين اسم المستخدم ومعرف الاتصال الحالي في التراكر
@@ -39,42 +40,35 @@ namespace Vitalink.API.Hubs
         // يجب أن تتأكد من أن حمولة ESP32 (SensorDataDto) تحتوي على خاصية BeltID
         public async Task SendSensorData(SensorDataDto data)
         {
-<<<<<<< HEAD
-            var incomingBeltId = data.BeltID; // استخراج BeltID المرسل من ESP32
-
-            if (string.IsNullOrEmpty(incomingBeltId))
+            // 1. التحقق من اكتمال البيانات
+            if (string.IsNullOrEmpty(data.BeltID) || data.HeartRate == 0)
             {
-                Debug.WriteLine("[ERROR] Received data with null or empty BeltID.");
+                Debug.WriteLine("[ERROR] Received incomplete sensor packet. Missing BeltID or HeartRate.");
                 return;
             }
-=======
-            // ----------------------------------------------------
-            // 1. التحقق من وجود البيانات الأساسية (Presence Check)
-            // ----------------------------------------------------
-            // HeartRate هو الحقل الوحيد المحدد كـ [Required] في الـ DTO الخاص بك.
-         
->>>>>>> 6270a90753d327e77c2102f1cb2064ec1aec4f58
 
-            // 1. البحث في قاعدة البيانات عن المستخدم المرتبط بهذا الحزام
-            var athlete = await _dbContext.AthleteProfiles
+            var incomingBeltId = data.BeltID;
+
+            // 2. البحث في قاعدة البيانات عن المستخدم المرتبط بهذا الحزام (باستخدام BeltID)
+            var targetUsername = await _dbContext.AthleteProfiles
                                           .Where(a => a.BeltID == incomingBeltId)
-                                          .Select(a => a.FirstName) // اختيار الـ Username (الـ FirstName)
+                                          .Select(a => a.FirstName) // FirstName هو Username المطلوب
                                           .FirstOrDefaultAsync();
 
-            if (athlete != null)
+            if (targetUsername != null)
             {
-                // 2. الحصول على الـ ConnectionID النشط حالياً للمستخدم
-                var targetConnectionId = _tracker.GetConnectionId(athlete);
+                // 3. الحصول على الـ ConnectionID النشط حالياً للمستخدم
+                var targetConnectionId = _tracker.GetConnectionId(targetUsername);
 
                 if (targetConnectionId != null)
                 {
-                    // 3. توجيه البيانات مباشرة إلى اتصال المستخدم المحدد
+                    // 4. توجيه البيانات مباشرة إلى اتصال المستخدم المحدد
                     await Clients.Client(targetConnectionId).SendAsync("ReceiveLiveUpdate", data);
-                    Debug.WriteLine($"[STREAM] Data routed from {incomingBeltId} to user {athlete} via {targetConnectionId}");
+                    Debug.WriteLine($"[STREAM] Data routed from {incomingBeltId} to user {targetUsername} via {targetConnectionId}");
                 }
                 else
                 {
-                    Debug.WriteLine($"[WARNING] Data received for {athlete} but dashboard is not connected.");
+                    Debug.WriteLine($"[WARNING] Data received for {targetUsername} but dashboard is not connected.");
                 }
             }
             else

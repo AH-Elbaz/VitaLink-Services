@@ -1,31 +1,31 @@
-﻿using System.Collections.Concurrent;
+﻿// ملف: Services/ConnectionTracker.cs
+
+using System.Collections.Concurrent;
 
 namespace Vitalink.API.Services
 {
-    // خدمة Singleton لتخزين الاتصالات النشطة
+    // يجب تسجيل هذه الخدمة كـ Singleton في Program.cs
     public class ConnectionTracker
     {
-        // استخدام ConcurrentDictionary لضمان الأمان عند تعدد الخيوط (Thread-Safety)
-        // Key: Username (FirstName)
-        // Value: ConnectionId (معرف اتصال SignalR المؤقت)
+        // ConcurrentDictionary لضمان التخزين الآمن للخيوط
+        // Key: Username (FirstName), Value: ConnectionId (معرف اتصال SignalR المؤقت)
         private static readonly ConcurrentDictionary<string, string> ActiveConnections =
             new ConcurrentDictionary<string, string>();
 
         /// <summary>
-        /// يُضيف أو يُحدّث معرف الاتصال للمستخدم عند تسجيل دخوله للواجهة الأمامية.
+        /// يُضيف أو يُحدّث معرف الاتصال للمستخدم.
         /// </summary>
         public void AddConnection(string username, string connectionId)
         {
-            // AddOrUpdate تضيف قيمة جديدة أو تحدث قيمة موجودة
             ActiveConnections.AddOrUpdate(username, connectionId, (key, oldValue) => connectionId);
         }
 
         /// <summary>
-        /// يُزيل معرف الاتصال عند انقطاع اتصال الواجهة الأمامية (تسجيل الخروج أو إغلاق الصفحة).
+        /// يُزيل معرف الاتصال عند انقطاعه.
         /// </summary>
         public void RemoveConnection(string connectionId)
         {
-            // نبحث عن اسم المستخدم المرتبط بـ ConnectionId ثم نزيله
+            // يبحث عن القيمة (ConnectionId) ليجد الـ Key (Username) ثم يزيله
             var item = ActiveConnections.FirstOrDefault(x => x.Value == connectionId);
             if (item.Key != null)
             {
@@ -34,7 +34,7 @@ namespace Vitalink.API.Services
         }
 
         /// <summary>
-        /// الحصول على معرف الاتصال النشط بناءً على اسم المستخدم (Username).
+        /// الحصول على معرف الاتصال النشط بناءً على اسم المستخدم.
         /// </summary>
         public string? GetConnectionId(string username)
         {

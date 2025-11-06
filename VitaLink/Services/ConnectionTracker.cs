@@ -1,23 +1,35 @@
-﻿// ملف: Services/ConnectionTracker.cs
+﻿// ملف: Services/ConnectionTracker.cs (التعديل النهائي)
 
 using System.Collections.Concurrent;
+using System.Collections.Generic; // لـ HashSet
+using System.Linq;
 
 namespace Vitalink.API.Services
 {
-    // يجب تسجيل هذه الخدمة كـ Singleton في Program.cs
     public class ConnectionTracker
     {
-        // ConcurrentDictionary لضمان التخزين الآمن للخيوط
-        // Key: Username (FirstName), Value: ConnectionId (معرف اتصال SignalR المؤقت)
-        private static readonly ConcurrentDictionary<string, string> ActiveConnections =
-            new ConcurrentDictionary<string, string>();
+        // *** الهيكل الجديد: Key (Username) يربط بمجموعة من ConnectionIDs ***
+        private static readonly ConcurrentDictionary<string, HashSet<string>> ActiveConnections =
+            new ConcurrentDictionary<string, HashSet<string>>();
 
         /// <summary>
-        /// يُضيف أو يُحدّث معرف الاتصال للمستخدم.
+        /// يُضيف معرف الاتصال الجديد إلى مجموعة المستخدم.
         /// </summary>
         public void AddConnection(string username, string connectionId)
         {
-            ActiveConnections.AddOrUpdate(username, connectionId, (key, oldValue) => connectionId);
+            string normalizedUsername = username.ToLower();
+
+            // GetOrAdd للحصول على المجموعة أو إنشائها (HashSet)
+            var connections = ActiveConnections.GetOrAdd(
+                normalizedUsername,
+                _ => new HashSet<string>()
+            );
+
+            // إضافة الاتصال الجديد إلى المجموعة
+            lock (connections)
+            {
+                connections.Add(connectionId);
+            }
         }
 
         /// <summary>
@@ -25,24 +37,34 @@ namespace Vitalink.API.Services
         /// </summary>
         public void RemoveConnection(string connectionId)
         {
-            // يبحث عن القيمة (ConnectionId) ليجد الـ Key (Username) ثم يزيله
-            var item = ActiveConnections.FirstOrDefault(x => x.Value == connectionId);
-            if (item.Key != null)
+            // نمر على جميع المستخدمين لإزالة الـ ConnectionId
+            foreach (var kvp in ActiveConnections)
             {
-                ActiveConnections.TryRemove(item.Key, out _);
+                lock (kvp.Value)
+                {
+                    kvp.Value.Remove(connectionId);
+
+                    // إذا أصبحت المجموعة فارغة، يمكن إزالة المستخدم من الـ Dictionary
+                    if (kvp.Value.Count == 0)
+                    {
+                        ActiveConnections.TryRemove(kvp.Key, out _);
+                    }
+                }
             }
         }
 
         /// <summary>
-        /// الحصول على معرف الاتصال النشط بناءً على اسم المستخدم.
+        /// الحصول على قائمة بجميع ConnectionIDs النشطة للمستخدم.
         /// </summary>
-        public string? GetConnectionId(string username)
+        public IEnumerable<string> GetConnectionIds(string username)
         {
-            if (ActiveConnections.TryGetValue(username, out string? connectionId))
+            string normalizedUsername = username.ToLower();
+            if (ActiveConnections.TryGetValue(normalizedUsername, out HashSet<string>? connections))
             {
-                return connectionId;
+                // إرجاع قائمة الاتصالات لهذا المستخدم
+                return connections.ToList();
             }
-            return null;
+            return Enumerable.Empty<string>();
         }
     }
 }

@@ -52,15 +52,16 @@
 
                 if (targetUsername != null)
                 {
-                    // 3. الحصول على الـ ConnectionID النشط حالياً للمستخدم
-                    var targetConnectionId = _tracker.GetConnectionId(targetUsername);
+                // 3. الحصول على الـ ConnectionID النشط حالياً للمستخدم
+                var targetConnectionIds = _tracker.GetConnectionIds(targetUsername);
 
-                    if (targetConnectionId != null)
+                if (targetConnectionIds.Any())
                     {
-                        // 4. توجيه البيانات مباشرة إلى اتصال المستخدم المحدد
-                        await Clients.Client(targetConnectionId).SendAsync("ReceiveLiveUpdate", data);
-                        Debug.WriteLine($"[STREAM] Data routed from {incomingBeltId} to user {targetUsername} via {targetConnectionId}");
-                    }
+                    // 4. توجيه البيانات مباشرة إلى اتصال المستخدم المحدد
+                    await Clients.Clients(targetConnectionIds.ToList()).SendAsync("ReceiveLiveUpdate", data);
+
+                    Debug.WriteLine($"[STREAM SUCCESS] Data routed to {targetConnectionIds.Count()} connection(s) for user {targetUsername}.");
+                }
                     else
                     {
                         Debug.WriteLine($"[WARNING] Data received for {targetUsername} but dashboard is not connected.");

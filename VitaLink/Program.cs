@@ -18,7 +18,7 @@ var builder = WebApplication.CreateBuilder(args);
 // --------------------------------------------------------------------------------------
 
 // 1.1. تسجيل DbContext وتفعيل مرونة الأخطاء العابرة (Retry Policy)
-builder.Services.AddDbContext<VitalinkDbContext>(options =>
+builder.Services.AddDbContextFactory<VitalinkDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
         sqlServerOptionsAction: sqlOptions =>
         {

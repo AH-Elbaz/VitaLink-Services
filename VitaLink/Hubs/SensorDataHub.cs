@@ -42,8 +42,8 @@
                                               .Where(a => a.BeltID == incomingBeltId)
                                               .Select(a => a.FirstName) 
                                               .FirstOrDefaultAsync();
-            _dbContext.SensorDataRaw.Add(data);
-            _dbContext.SaveChanges();
+            // _dbContext.SensorDataRaw.Add(data);
+            // _dbContext.SaveChanges();
 
             if (targetUsername != null)
                 {

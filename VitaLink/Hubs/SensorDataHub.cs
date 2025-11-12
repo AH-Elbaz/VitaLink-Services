@@ -55,7 +55,7 @@
                 if (targetConnectionIds.Any())
                     {
 
-                    await _athleteProfilesController.RawData(data);
+                    // await _athleteProfilesController.RawData(data);
 
               
                     await Clients.Clients(targetConnectionIds.ToList()).SendAsync("ReceiveLiveUpdate", data);

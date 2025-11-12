@@ -33,43 +33,42 @@ namespace Vitalink.API.Hubs
         {
             var incomingBeltId = data.BeltID;
 
-            // 1️⃣ Identify the athlete by BeltID
+            // Find athlete by BeltID
             var targetUsername = await _dbContext.AthleteProfiles
                 .Where(a => a.BeltID == incomingBeltId)
-                .Select(a => a.FirstName)
+                .Select(a => a.FirstName) // make sure you use username here
                 .FirstOrDefaultAsync();
 
             if (targetUsername == null)
             {
-                Debug.WriteLine($"[WARNING] Data received from unknown BeltID: {incomingBeltId}. Ignoring.");
+                Debug.WriteLine($"[WARNING] Unknown BeltID: {incomingBeltId}");
                 return;
             }
 
             try
             {
-                // 2️⃣ Store the sensor data BEFORE sending
+                // Save the sensor data first
                 await _athleteProfilesController.RawData(data);
-                await _dbContext.SaveChangesAsync();
-
-                Debug.WriteLine($"[DATA STORED] Sensor data saved for {targetUsername}.");
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"[ERROR] Failed to save data: {ex.Message}");
-                return; // stop here — do not broadcast unsaved data
+                return; // do not broadcast unsaved data
             }
 
-            // 3️⃣ Broadcast the data to connected clients
+            // Broadcast to connected clients
             var targetConnectionIds = _tracker.GetConnectionIds(targetUsername);
 
             if (targetConnectionIds.Any())
             {
-                await Clients.Clients(targetConnectionIds.ToList()).SendAsync("ReceiveLiveUpdate", data);
-                Debug.WriteLine($"[STREAM SUCCESS] Data routed to {targetConnectionIds.Count()} connection(s) for user {targetUsername}.");
+                await Clients.Clients(targetConnectionIds.ToList())
+                    .SendAsync("ReceiveLiveUpdate", data);
+
+                Debug.WriteLine($"[STREAM SUCCESS] Data sent to {targetConnectionIds.Count()} connection(s) for {targetUsername}.");
             }
             else
             {
-                Debug.WriteLine($"[WARNING] Data received for {targetUsername} but dashboard is not connected.");
+                Debug.WriteLine($"[WARNING] No active connections for {targetUsername}");
             }
         }
 

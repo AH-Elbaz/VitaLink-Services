@@ -52,7 +52,8 @@
 
                 if (targetConnectionIds.Any())
                     {
-                   
+                    _dbContext.SensorDataRaw.Add(data);
+                  await _dbContext.SaveChangesAsync();
                     await Clients.Clients(targetConnectionIds.ToList()).SendAsync("ReceiveLiveUpdate", data);
 
                     Debug.WriteLine($"[STREAM SUCCESS] Data routed to {targetConnectionIds.Count()} connection(s) for user {targetUsername}.");

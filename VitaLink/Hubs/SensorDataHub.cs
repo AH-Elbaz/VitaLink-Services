@@ -1,4 +1,4 @@
-﻿   
+   
     using Microsoft.AspNetCore.SignalR;
     using Microsoft.EntityFrameworkCore;
     using System.Diagnostics;
@@ -6,24 +6,27 @@
     using Vitalink.API.Dtos;
     using Vitalink.API.Services;
     using VitaLink.Models.Data;
+    using Vitalink.API.Controllers;
 
     namespace Vitalink.API.Hubs
     {
         public class SensorDataHub : Hub
         {
             private readonly ConnectionTracker _tracker;
-            private readonly VitalinkDbContext _dbContext; 
+            private readonly VitalinkDbContext _dbContext;
+        private readonly AthleteProfilesController _athleteProfilesController;
 
-            
-            public SensorDataHub(ConnectionTracker tracker, VitalinkDbContext dbContext)
-            {
-                _tracker = tracker;
-                _dbContext = dbContext;
-            }
 
-         
+        public SensorDataHub(ConnectionTracker tracker, VitalinkDbContext dbContext, AthleteProfilesController athleteProfilesController)
+        {
+            _tracker = tracker;
+            _dbContext = dbContext;
+            _athleteProfilesController = athleteProfilesController;
+        }
 
-            public async Task RegisterConnection(string username)
+
+
+        public async Task RegisterConnection(string username)
             {
                 
                 _tracker.AddConnection(username, Context.ConnectionId);
@@ -42,8 +45,7 @@
                                               .Where(a => a.BeltID == incomingBeltId)
                                               .Select(a => a.FirstName) 
                                               .FirstOrDefaultAsync();
-            // _dbContext.SensorDataRaw.Add(data);
-            // _dbContext.SaveChanges();
+
 
             if (targetUsername != null)
                 {
@@ -52,8 +54,12 @@
 
                 if (targetConnectionIds.Any())
                     {
+
+                    await _athleteProfilesController.RawData(data);
+
                     _dbContext.SensorDataRaw.Add(data);
                   await _dbContext.SaveChangesAsync();
+
                     await Clients.Clients(targetConnectionIds.ToList()).SendAsync("ReceiveLiveUpdate", data);
 
                     Debug.WriteLine($"[STREAM SUCCESS] Data routed to {targetConnectionIds.Count()} connection(s) for user {targetUsername}.");
@@ -80,3 +86,4 @@
             }
         }
     }
+

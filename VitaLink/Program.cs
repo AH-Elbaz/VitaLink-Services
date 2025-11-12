@@ -55,7 +55,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 
-builder.Services.AddScoped<IAiAnalysisService, GeminiService>();
+
 
 // 1.5. تكوين خدمة مصادقة JWT
 builder.Services.AddAuthentication(options =>

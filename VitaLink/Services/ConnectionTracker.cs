@@ -8,13 +8,9 @@ namespace Vitalink.API.Services
 {
     public class ConnectionTracker
     {
-        // *** الهيكل الجديد: Key (Username) يربط بمجموعة من ConnectionIDs ***
         private static readonly ConcurrentDictionary<string, HashSet<string>> ActiveConnections =
             new ConcurrentDictionary<string, HashSet<string>>();
 
-        /// <summary>
-        /// يُضيف معرف الاتصال الجديد إلى مجموعة المستخدم.
-        /// </summary>
         public void AddConnection(string username, string connectionId)
         {
             string normalizedUsername = username.ToLower();
@@ -32,9 +28,7 @@ namespace Vitalink.API.Services
             }
         }
 
-        /// <summary>
-        /// يُزيل معرف الاتصال عند انقطاعه.
-        /// </summary>
+      
         public void RemoveConnection(string connectionId)
         {
             // نمر على جميع المستخدمين لإزالة الـ ConnectionId
@@ -53,15 +47,12 @@ namespace Vitalink.API.Services
             }
         }
 
-        /// <summary>
-        /// الحصول على قائمة بجميع ConnectionIDs النشطة للمستخدم.
-        /// </summary>
         public IEnumerable<string> GetConnectionIds(string username)
         {
             string normalizedUsername = username.ToLower();
             if (ActiveConnections.TryGetValue(normalizedUsername, out HashSet<string>? connections))
             {
-                // إرجاع قائمة الاتصالات لهذا المستخدم
+              
                 return connections.ToList();
             }
             return Enumerable.Empty<string>();

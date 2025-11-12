@@ -43,13 +43,31 @@ namespace Vitalink.API.Controllers
             return CreatedAtAction(nameof(GetAthleteProfile), new { id = athleteProfile.AthleteID }, athleteProfile);
         }
 
-        [HttpPost]
-        public async Task<ActionResult<AthleteProfile>> RawData(SensorDataDto data)
+        [HttpPost("raw")]
+        public async Task<IActionResult> RawData([FromBody] SensorDataDto data)
         {
-           _context.SensorDataRaw.Add(data);
-              await _context.SaveChangesAsync();
-              return Ok();
+            if (data == null)
+                return BadRequest("Sensor data cannot be null.");
+
+            var entity = new SensorDataRaw
+            {
+                BeltID = data.BeltID,
+                HeartRate = data.HeartRate,
+                Spo2 = data.Spo2,
+                Temperature = data.Temperature,
+                AccX = data.AccX,
+                AccY = data.AccY,
+                AccZ = data.AccZ,
+                Sweat = data.Sweat,
+                Timestamp = DateTime.UtcNow
+            };
+
+            _context.SensorDataRaw.Add(entity);
+            await _context.SaveChangesAsync();
+
+            return Ok();
         }
+
 
         // -------------------------------------------------------------------
         // HTTP GET: api/AthleteProfiles

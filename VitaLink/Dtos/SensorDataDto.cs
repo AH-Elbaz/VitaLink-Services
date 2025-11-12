@@ -1,9 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Vitalink.Models;
 
 namespace Vitalink.API.Dtos
 {
-    public class SensorDataDto : SensorDataRaw
+    public class SensorDataDto
     {
 
         [Required]

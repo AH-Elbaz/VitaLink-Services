@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VitaLink.Models.Data;
 
@@ -11,9 +12,11 @@ using VitaLink.Models.Data;
 namespace VitaLink.Migrations
 {
     [DbContext(typeof(VitalinkDbContext))]
-    partial class VitalinkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251112165226_AddSensorDataRawId")]
+    partial class AddSensorDataRawId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -130,11 +133,8 @@ namespace VitaLink.Migrations
 
             modelBuilder.Entity("Vitalink.Models.SensorDataRaw", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("BeltID")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<float>("AccX")
                         .HasColumnType("real");
@@ -145,12 +145,14 @@ namespace VitaLink.Migrations
                     b.Property<float>("AccZ")
                         .HasColumnType("real");
 
-                    b.Property<string>("BeltID")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<float>("HeartRate")
                         .HasColumnType("real");
+
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<byte>("Spo2")
                         .HasColumnType("tinyint");
@@ -167,7 +169,7 @@ namespace VitaLink.Migrations
                     b.Property<int?>("TrainingSessionSessionID")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.HasKey("BeltID");
 
                     b.HasIndex("TrainingSessionSessionID");
 

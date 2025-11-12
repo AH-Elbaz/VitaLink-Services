@@ -6,26 +6,23 @@ namespace Vitalink.Models
 {
     public class SensorDataRaw
     {
+        [Key]
+        public long DataID { get; set; } // نستخدم long لأن هذا الجدول سيكون كبيراً جداً
 
         [Required]
-        public string BeltID { get; set; }
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
+        // بيانات الحساسات
+        public int HeartRate { get; set; }
+        public double OxygenSaturation { get; set; }
+        public double BodyTemperature { get; set; }
+        public string SweatComposition { get; set; } // مثال على بيانات متغيرة
+        public double MotionData_X { get; set; }
 
-        [Required]
-        public float HeartRate { get; set; }
+        // المفتاح الخارجي لربط البيانات بجلسة التدريب
+        public int SessionID { get; set; }
 
-
-        public byte Spo2 { get; set; }
-
-
-        public float Temperature { get; set; }
-
-
-        public float AccX { get; set; }
-        public float AccY { get; set; }
-        public float AccZ { get; set; }
-
-
-        public ushort Sweat { get; set; }
+        [ForeignKey("SessionID")]
+        public TrainingSession TrainingSession { get; set; }
     }
 }

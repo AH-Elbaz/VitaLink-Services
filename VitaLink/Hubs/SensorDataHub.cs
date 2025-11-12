@@ -1,70 +1,42 @@
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
-using Vitalink.API.Dtos;
-using Vitalink.API.Services;
-using VitaLink.Models.Data;
-using Vitalink.API.Controllers;
+   
+    using Microsoft.AspNetCore.SignalR;
+    using Microsoft.EntityFrameworkCore;
+    using System.Diagnostics;
+    using System.Security.Claims;
+    using Vitalink.API.Dtos;
+    using Vitalink.API.Services;
+    using VitaLink.Models.Data;
 
-namespace Vitalink.API.Hubs
-{
-    public class SensorDataHub : Hub
+    namespace Vitalink.API.Hubs
     {
-        private readonly ConnectionTracker _tracker;
-        private readonly VitalinkDbContext _dbContext;
-        private readonly AthleteProfilesController _athleteProfilesController;
-
-        public SensorDataHub(ConnectionTracker tracker, VitalinkDbContext dbContext, AthleteProfilesController athleteProfilesController)
+        public class SensorDataHub : Hub
         {
-            _tracker = tracker;
-            _dbContext = dbContext;
-            _athleteProfilesController = athleteProfilesController;
-        }
+            private readonly ConnectionTracker _tracker;
+            private readonly VitalinkDbContext _dbContext; 
 
-        // Called when a new connection registers (maps username to connection ID)
-        public async Task RegisterConnection(string username)
-        {
-            _tracker.AddConnection(username, Context.ConnectionId);
-            Debug.WriteLine($"[CONNECTION] User {username} registered ID: {Context.ConnectionId}");
-        }
-
-        // Receives live sensor data from a device
-        public async Task SendSensorData(SensorDataDto data)
-        {
-            var incomingBeltId = data.BeltID;
-
-            // Find athlete by BeltID
-            var targetUsername = await _dbContext.AthleteProfiles
-                .Where(a => a.BeltID == incomingBeltId)
-                .Select(a => a.FirstName) // make sure you use username here
-                .FirstOrDefaultAsync();
-
-            if (targetUsername == null)
+            
+            public SensorDataHub(ConnectionTracker tracker, VitalinkDbContext dbContext)
             {
-                Debug.WriteLine($"[WARNING] Unknown BeltID: {incomingBeltId}");
-                return;
+                _tracker = tracker;
+                _dbContext = dbContext;
             }
 
-            try
+         
+
+            public async Task RegisterConnection(string username)
             {
-                // Save the sensor data first
-                await _athleteProfilesController.RawData(data);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"[ERROR] Failed to save data: {ex.Message}");
-                return; // do not broadcast unsaved data
+                
+                _tracker.AddConnection(username, Context.ConnectionId);
+                Debug.WriteLine($"[CONNECTION] User {username} registered ID: {Context.ConnectionId}");
             }
 
-            // Broadcast to connected clients
-            var targetConnectionIds = _tracker.GetConnectionIds(targetUsername);
-
-            if (targetConnectionIds.Any())
+            
+            public async Task SendSensorData(SensorDataDto data)
             {
-                await Clients.Clients(targetConnectionIds.ToList())
-                    .SendAsync("ReceiveLiveUpdate", data);
+             
+              
+                var incomingBeltId = data.BeltID;
 
-<<<<<<< HEAD
               
                 var targetUsername = await _dbContext.AthleteProfiles
                                               .Where(a => a.BeltID == incomingBeltId)
@@ -92,26 +64,16 @@ namespace Vitalink.API.Hubs
                 {
                     Debug.WriteLine($"[WARNING] Data received from unknown BeltID: {incomingBeltId}. Ignoring.");
                 }
-=======
-                Debug.WriteLine($"[STREAM SUCCESS] Data sent to {targetConnectionIds.Count()} connection(s) for {targetUsername}.");
->>>>>>> 3d587eb1573481c2dbbedfcd85b2caea70ae95cf
             }
-            else
-            {
-                Debug.WriteLine($"[WARNING] No active connections for {targetUsername}");
-            }
-        }
-<<<<<<< HEAD
-    }
-=======
 
-        // Handles disconnection cleanup
-        public override async Task OnDisconnectedAsync(Exception? exception)
-        {
-            _tracker.RemoveConnection(Context.ConnectionId);
-            Debug.WriteLine($"[DISCONNECT] Connection ID {Context.ConnectionId} removed.");
-            await base.OnDisconnectedAsync(exception);
+         
+
+            public override async Task OnDisconnectedAsync(Exception? exception)
+            {
+              
+                _tracker.RemoveConnection(Context.ConnectionId);
+                Debug.WriteLine($"[DISCONNECT] Connection ID {Context.ConnectionId} removed.");
+                await base.OnDisconnectedAsync(exception);
+            }
         }
     }
-}
->>>>>>> 3d587eb1573481c2dbbedfcd85b2caea70ae95cf

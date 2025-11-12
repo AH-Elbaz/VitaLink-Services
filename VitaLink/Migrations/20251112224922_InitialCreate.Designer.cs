@@ -12,8 +12,8 @@ using VitaLink.Models.Data;
 namespace VitaLink.Migrations
 {
     [DbContext(typeof(VitalinkDbContext))]
-    [Migration("20251112172050_AddIdAndTimestampToSensorDataRaw")]
-    partial class AddIdAndTimestampToSensorDataRaw
+    [Migration("20251112224922_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -133,46 +133,37 @@ namespace VitaLink.Migrations
 
             modelBuilder.Entity("Vitalink.Models.SensorDataRaw", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("DataID")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("DataID"));
+
+                    b.Property<double>("BodyTemperature")
+                        .HasColumnType("float");
+
+                    b.Property<int>("HeartRate")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<double>("MotionData_X")
+                        .HasColumnType("float");
 
-                    b.Property<float>("AccX")
-                        .HasColumnType("real");
+                    b.Property<double>("OxygenSaturation")
+                        .HasColumnType("float");
 
-                    b.Property<float>("AccY")
-                        .HasColumnType("real");
+                    b.Property<int>("SessionID")
+                        .HasColumnType("int");
 
-                    b.Property<float>("AccZ")
-                        .HasColumnType("real");
-
-                    b.Property<string>("BeltID")
+                    b.Property<string>("SweatComposition")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<float>("HeartRate")
-                        .HasColumnType("real");
-
-                    b.Property<byte>("Spo2")
-                        .HasColumnType("tinyint");
-
-                    b.Property<int>("Sweat")
-                        .HasColumnType("int");
-
-                    b.Property<float>("Temperature")
-                        .HasColumnType("real");
 
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("TrainingSessionSessionID")
-                        .HasColumnType("int");
+                    b.HasKey("DataID");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("TrainingSessionSessionID");
+                    b.HasIndex("SessionID");
 
                     b.ToTable("SensorDataRaw");
                 });
@@ -270,9 +261,13 @@ namespace VitaLink.Migrations
 
             modelBuilder.Entity("Vitalink.Models.SensorDataRaw", b =>
                 {
-                    b.HasOne("Vitalink.Models.TrainingSession", null)
+                    b.HasOne("Vitalink.Models.TrainingSession", "TrainingSession")
                         .WithMany("SensorDataRaw")
-                        .HasForeignKey("TrainingSessionSessionID");
+                        .HasForeignKey("SessionID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TrainingSession");
                 });
 
             modelBuilder.Entity("Vitalink.Models.SessionSummary", b =>

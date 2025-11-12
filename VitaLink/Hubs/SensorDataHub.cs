@@ -6,6 +6,7 @@
     using Vitalink.API.Dtos;
     using Vitalink.API.Services;
     using VitaLink.Models.Data;
+    using Vitalink.API.Controllers;
 
     namespace Vitalink.API.Hubs
     {
@@ -13,17 +14,18 @@
         {
             private readonly ConnectionTracker _tracker;
             private readonly VitalinkDbContext _dbContext; 
+            private readonly AthleteProfilesController _athleteController;
 
-            
-            public SensorDataHub(ConnectionTracker tracker, VitalinkDbContext dbContext)
-            {
-                _tracker = tracker;
-                _dbContext = dbContext;
-            }
+        public SensorDataHub(ConnectionTracker tracker, VitalinkDbContext dbContext, AthleteProfilesController athleteController)
+        {
+            _tracker = tracker;
+            _dbContext = dbContext;
+            _athleteController = athleteController;
+        }
 
-         
 
-            public async Task RegisterConnection(string username)
+
+        public async Task RegisterConnection(string username)
             {
                 
                 _tracker.AddConnection(username, Context.ConnectionId);
@@ -45,7 +47,9 @@
 
                 if (targetUsername != null)
                 {
-             
+                 
+               await _athleteController.PostAthleteProfileRowData(data);
+
                 var targetConnectionIds = _tracker.GetConnectionIds(targetUsername);
 
                 if (targetConnectionIds.Any())

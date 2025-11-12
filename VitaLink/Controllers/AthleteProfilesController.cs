@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Vitalink.API.Dtos;
-using Vitalink.Models;
 using VitaLink.Models.Data;
+using Vitalink.Models;
 
 
 namespace Vitalink.API.Controllers
@@ -42,32 +41,6 @@ namespace Vitalink.API.Controllers
             // 3. Return a success status with the created object and the location of the new resource
             return CreatedAtAction(nameof(GetAthleteProfile), new { id = athleteProfile.AthleteID }, athleteProfile);
         }
-
-        [HttpPost("raw")]
-        public async Task<IActionResult> RawData([FromBody] SensorDataDto data)
-        {
-            if (data == null)
-                return BadRequest("Sensor data cannot be null.");
-
-            var entity = new SensorDataRaw
-            {
-                BeltID = data.BeltID,
-                HeartRate = data.HeartRate,
-                Spo2 = data.Spo2,
-                Temperature = data.Temperature,
-                AccX = data.AccX,
-                AccY = data.AccY,
-                AccZ = data.AccZ,
-                Sweat = data.Sweat,
-                Timestamp = DateTime.UtcNow
-            };
-
-            _context.SensorDataRaw.Add(entity);
-            await _context.SaveChangesAsync();
-
-            return Ok();
-        }
-
 
         // -------------------------------------------------------------------
         // HTTP GET: api/AthleteProfiles

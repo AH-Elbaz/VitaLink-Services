@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 ﻿using System.ComponentModel.DataAnnotations;
+=======
+using System.ComponentModel.DataAnnotations;
+using Vitalink.Models;
+>>>>>>> 3d587eb1573481c2dbbedfcd85b2caea70ae95cf
 
 namespace Vitalink.API.Dtos
 {

@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using VitaLink.Models.Data;
+using Vitalink.API.Dtos;
 using Vitalink.Models;
+using VitaLink.Models.Data;
 
 
 namespace Vitalink.API.Controllers
@@ -40,6 +41,14 @@ namespace Vitalink.API.Controllers
 
             // 3. Return a success status with the created object and the location of the new resource
             return CreatedAtAction(nameof(GetAthleteProfile), new { id = athleteProfile.AthleteID }, athleteProfile);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<AthleteProfile>> RawData(SensorDataDto data)
+        {
+           _context.SensorDataRaw.Add(data);
+              await _context.SaveChangesAsync();
+              return Ok();
         }
 
         // -------------------------------------------------------------------

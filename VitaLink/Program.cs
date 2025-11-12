@@ -29,6 +29,8 @@ builder.Services.AddDbContext<VitalinkDbContext>(options =>
                 errorNumbersToAdd: null);
         }));
 
+builder.Services.AddScoped<ISensorDataService, SensorDataService>();
+
 // 1.2. تسجيل خدمة التوكن (JWT Service)
 builder.Services.AddScoped<ITokenService, TokenService>();
 

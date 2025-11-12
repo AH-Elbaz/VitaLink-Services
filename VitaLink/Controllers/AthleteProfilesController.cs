@@ -43,34 +43,7 @@ namespace Vitalink.API.Controllers
             return CreatedAtAction(nameof(GetAthleteProfile), new { id = athleteProfile.AthleteID }, athleteProfile);
         }
 
-        [HttpPost("RowData")]
-        public async Task<ActionResult<AthleteProfile>> PostAthleteProfileRowData(SensorDataDto data)
-        {
 
-
-            try
-            {
-                var entity = new SensorDataRaw
-                {
-                    AccX = data.AccX,
-                    AccY = data.AccY,
-                    AccZ = data.AccZ,
-                    BeltID = data.BeltID,
-                    Sweat = data.Sweat,
-                    HeartRate = data.HeartRate,
-                    Spo2 = data.Spo2,
-                    Temperature = data.Temperature
-                };
-
-                _context.SensorDataRaw.Add(entity);
-                await _context.SaveChangesAsync();
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
 
         // -------------------------------------------------------------------
         // HTTP GET: api/AthleteProfiles

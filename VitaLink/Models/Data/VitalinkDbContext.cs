@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Vitalink.Models;
 
 namespace VitaLink.Models.Data
@@ -30,16 +30,13 @@ namespace VitaLink.Models.Data
                 .WithOne(t => t.Athlete)
                 .HasForeignKey(t => t.AthleteID);
 
-            // --- SensorDataRaw Configuration ---
             modelBuilder.Entity<SensorDataRaw>(entity =>
             {
-                entity.HasKey(e => e.BeltID); // Use BeltID as the primary key
-                entity.Property(e => e.BeltID)
-                    .IsRequired();
+                entity.HasKey(e => e.Id); // use new Id as PK
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
-                entity.Property(e => e.HeartRate)
-                    .IsRequired();
-
+                entity.Property(e => e.BeltID).IsRequired();
+                entity.Property(e => e.HeartRate).IsRequired();
                 entity.Property(e => e.Spo2);
                 entity.Property(e => e.Temperature);
                 entity.Property(e => e.AccX);

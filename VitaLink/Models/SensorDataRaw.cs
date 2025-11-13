@@ -7,6 +7,7 @@ namespace Vitalink.Models
     public class SensorDataRaw
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string BeltID { get; set; }
 
 

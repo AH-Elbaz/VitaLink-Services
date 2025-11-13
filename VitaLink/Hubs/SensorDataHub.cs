@@ -5,35 +5,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using Vitalink.API.Dtos;
 using Vitalink.API.Services;
-using VitaLink.Models.Data; // تأكد من أن هذا هو المسار الصحيح لـ AthleteProfiles
+using VitaLink.Models.Data;
 
 namespace Vitalink.API.Hubs
 {
     public class SensorDataHub : Hub
     {
         private readonly ConnectionTracker _tracker;
-        // تم إزالة VitalinkDbContext لأنه لم يعد ضروريًا هنا
         private readonly ISensorDataService _sensorDataService;
+        private readonly IDbContextFactory<VitalinkDbContext> _contextFactory; // تم الإبقاء على هذا
 
-        // تم تعديل الـ Constructor لإزالة VitalinkDbContext
-        public SensorDataHub(ConnectionTracker tracker, ISensorDataService sensorDataService)
-        {
-            _tracker = tracker;
-            _sensorDataService = sensorDataService;
-        }
-
-        // ملاحظة: بما أنك تستخدم _dbContext في دالة SendSensorData للبحث عن targetUsername،
-        // يجب أن نستخدم IDbContextFactory هنا أيضًا، أو نمرر الخدمة التي تقوم بالبحث.
-        // الحل الأفضل هو استخدام IDbContextFactory في الـ Hub أيضًا للبحث.
-
-        // بما أنك لم ترسل كود البحث، سأفترض أنك قمت بتعديل الـ Hub ليعتمد على IDbContextFactory
-        // أو أنك قمت بحقن VitalinkDbContext في الـ Hub (وهو ما قد يسبب المشكلة).
-
-        // سأفترض أنك تريد استخدام IDbContextFactory في الـ Hub للبحث عن اسم المستخدم أيضًا،
-        // لتجنب أي مشاكل في التزامن.
-
-        private readonly IDbContextFactory<VitalinkDbContext> _contextFactory;
-
+        // Constructor المصحح: يعتمد على الخدمات التي تم تسجيلها في Program.cs
         public SensorDataHub(ConnectionTracker tracker, ISensorDataService sensorDataService, IDbContextFactory<VitalinkDbContext> contextFactory)
         {
             _tracker = tracker;
@@ -55,8 +37,10 @@ namespace Vitalink.API.Hubs
 
             // استخدام IDbContextFactory للبحث عن اسم المستخدم
             string? targetUsername;
+            // استخدام await using لضمان التخلص من السياق بعد الانتهاء
             await using (var dbContext = _contextFactory.CreateDbContext())
             {
+                // البحث عن اسم المستخدم
                 targetUsername = await dbContext.AthleteProfiles
                                                 .Where(a => a.BeltID == incomingBeltId)
                                                 .Select(a => a.FirstName)
@@ -66,10 +50,10 @@ namespace Vitalink.API.Hubs
 
             if (targetUsername != null)
             {
-                // استدعاء الخدمة لحفظ البيانات (وهي تستخدم IDbContextFactory أيضًا)
+                // حفظ البيانات باستخدام الخدمة
                 await _sensorDataService.SaveRowData(data);
 
-                // استمرار بث البيانات
+                // بث البيانات
                 var targetConnectionIds = _tracker.GetConnectionIds(targetUsername);
 
                 if (targetConnectionIds.Any())

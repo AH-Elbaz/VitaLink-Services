@@ -22,11 +22,11 @@ namespace Vitalink.API.Services
             await using (var dbContext = _contextFactory.CreateDbContext()) {
 
                 var entity = new SensorDataRaw
-                {
+                {   
                     AccX = data.AccX,
                     AccY = data.AccY,
                     AccZ = data.AccZ,
-                    BeltID = data.BeltID,
+                    BeltID = Guid.NewGuid().ToString(),
                     Sweat = data.Sweat,
                     HeartRate = data.HeartRate,
                     Spo2 = data.Spo2,

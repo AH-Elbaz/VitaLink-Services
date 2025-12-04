@@ -23,7 +23,8 @@ namespace Vitalink.Models
 
         public string? BeltID { get; set; }
 
-        // خاصية للملاحة (Navigation Property) لربط الرياضي بجلساته
+        public Guid? AzurePersonId { get; set; }
+
         public ICollection<TrainingSession> TrainingSessions { get; set; } = new List<TrainingSession>();
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     }

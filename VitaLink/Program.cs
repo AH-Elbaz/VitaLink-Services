@@ -34,6 +34,8 @@ builder.Services.AddScoped<ISensorDataService, SensorDataService>();
 // 1.2. تسجيل خدمة التوكن (JWT Service)
 builder.Services.AddScoped<ITokenService, TokenService>();
 
+builder.Services.AddScoped<IFaceService, FaceService>();
+
 // ** 1.3. تسجيل خدمة SignalR Hubs **
 builder.Services.AddSignalR();
 

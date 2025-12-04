@@ -15,6 +15,7 @@ namespace Vitalink.Models
         public double OptimalIntensity { get; set; }
         public string AlertMessage { get; set; }
 
+
         // المفتاح الخارجي لربط التوصية بالجلسة التي حدثت فيها
         public int SessionID { get; set; }
 

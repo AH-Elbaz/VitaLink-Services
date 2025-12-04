@@ -51,7 +51,7 @@ namespace Vitalink.API.Hubs
             if (targetUsername != null)
             {
                 // حفظ البيانات باستخدام الخدمة
-                await _sensorDataService.SaveRowData(data);
+                //await _sensorDataService.SaveRowData(data);
 
                 // بث البيانات
                 var targetConnectionIds = _tracker.GetConnectionIds(targetUsername);

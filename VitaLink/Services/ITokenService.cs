@@ -1,5 +1,4 @@
-﻿// ملف: Services/ITokenService.cs
-using Dtos;
+﻿using Dtos;
 using Vitalink.Models;
 
 namespace Vitalink.API.Services

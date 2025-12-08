@@ -13,9 +13,8 @@ namespace Vitalink.API.Hubs
     {
         private readonly ConnectionTracker _tracker;
         private readonly ISensorDataService _sensorDataService;
-        private readonly IDbContextFactory<VitalinkDbContext> _contextFactory; // تم الإبقاء على هذا
+        private readonly IDbContextFactory<VitalinkDbContext> _contextFactory; 
 
-        // Constructor المصحح: يعتمد على الخدمات التي تم تسجيلها في Program.cs
         public SensorDataHub(ConnectionTracker tracker, ISensorDataService sensorDataService, IDbContextFactory<VitalinkDbContext> contextFactory)
         {
             _tracker = tracker;
@@ -35,12 +34,12 @@ namespace Vitalink.API.Hubs
         {
             var incomingBeltId = data.BeltID;
 
-            // استخدام IDbContextFactory للبحث عن اسم المستخدم
+          
             string? targetUsername;
-            // استخدام await using لضمان التخلص من السياق بعد الانتهاء
+
             await using (var dbContext = _contextFactory.CreateDbContext())
             {
-                // البحث عن اسم المستخدم
+            
                 targetUsername = await dbContext.AthleteProfiles
                                                 .Where(a => a.BeltID == incomingBeltId)
                                                 .Select(a => a.FirstName)
@@ -50,10 +49,7 @@ namespace Vitalink.API.Hubs
 
             if (targetUsername != null)
             {
-                // حفظ البيانات باستخدام الخدمة
-                //await _sensorDataService.SaveRowData(data);
-
-                // بث البيانات
+              
                 var targetConnectionIds = _tracker.GetConnectionIds(targetUsername);
 
                 if (targetConnectionIds.Any())

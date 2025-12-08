@@ -1,7 +1,7 @@
-﻿// ملف: Services/ConnectionTracker.cs (التعديل النهائي)
+﻿
 
 using System.Collections.Concurrent;
-using System.Collections.Generic; // لـ HashSet
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Vitalink.API.Services
@@ -15,30 +15,25 @@ namespace Vitalink.API.Services
         {
             string normalizedUsername = username.ToLower();
 
-            // GetOrAdd للحصول على المجموعة أو إنشائها (HashSet)
             var connections = ActiveConnections.GetOrAdd(
                 normalizedUsername,
                 _ => new HashSet<string>()
             );
 
-            // إضافة الاتصال الجديد إلى المجموعة
             lock (connections)
             {
                 connections.Add(connectionId);
             }
         }
 
-      
         public void RemoveConnection(string connectionId)
         {
-            // نمر على جميع المستخدمين لإزالة الـ ConnectionId
             foreach (var kvp in ActiveConnections)
             {
                 lock (kvp.Value)
                 {
                     kvp.Value.Remove(connectionId);
 
-                    // إذا أصبحت المجموعة فارغة، يمكن إزالة المستخدم من الـ Dictionary
                     if (kvp.Value.Count == 0)
                     {
                         ActiveConnections.TryRemove(kvp.Key, out _);
@@ -52,7 +47,6 @@ namespace Vitalink.API.Services
             string normalizedUsername = username.ToLower();
             if (ActiveConnections.TryGetValue(normalizedUsername, out HashSet<string>? connections))
             {
-              
                 return connections.ToList();
             }
             return Enumerable.Empty<string>();

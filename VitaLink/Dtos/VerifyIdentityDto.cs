@@ -6,9 +6,9 @@ namespace Dtos
     public class VerifyIdentityDto
     {
         [Required]
-        public string Username { get; set; } // أو FirstName حسب نظامك
+        public string Username { get; set; }
 
         [Required]
-        public string ImageBase64 { get; set; } // صورة السيلفي الجديدة
+        public string ImageBase64 { get; set; }
     }
 }

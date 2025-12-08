@@ -5,8 +5,8 @@ namespace Vitalink.Models
 {
     public class AthleteProfile
     {
-        [Key] // يحدد أن هذا هو المفتاح الأساسي
-        public string AthleteID { get; set; } = Guid.NewGuid().ToString(); // استخدام GUID كسلسلة لسهولة الإنشاء
+        [Key]
+        public string AthleteID { get; set; } = Guid.NewGuid().ToString();
 
         [Required]
         public string FirstName { get; set; }
@@ -16,7 +16,7 @@ namespace Vitalink.Models
         public string LastName { get; set; }
         public int Role { get; set; } = 0;
         public DateTime BirthDate { get; set; }
-        public double Weight { get; set; } // كجم
+        public double Weight { get; set; }
         public string BloodType { get; set; }
         public double BodyFatPercentage { get; set; }
         public string TargetSport { get; set; }

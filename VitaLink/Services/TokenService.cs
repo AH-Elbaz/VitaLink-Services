@@ -22,9 +22,7 @@ namespace Vitalink.API.Services
             _context = context;
         }
 
-        // ----------------------------------------------------
-        // 1 & 2: تشفير كلمة المرور (Hashing & Verification)
-        // ----------------------------------------------------
+        // Password hashing and verification
         public string HashPassword(string password)
         {
             return BCrypt.Net.BCrypt.HashPassword(password);
@@ -50,7 +48,6 @@ namespace Vitalink.API.Services
                 new Claim(ClaimTypes.Role, athlete.Role.ToString())
             };
 
-            // انتهاء الصلاحية: 15 دقيقة
             var expires = DateTime.UtcNow.AddMinutes(15);
 
             var token = new JwtSecurityToken(
@@ -76,7 +73,6 @@ namespace Vitalink.API.Services
             using var rng = RandomNumberGenerator.Create();
             rng.GetBytes(randomNumber);
 
-            // انتهاء الصلاحية: 7 أيام
             var expires = DateTime.UtcNow.AddDays(7);
 
             return new TokenResult
@@ -91,12 +87,12 @@ namespace Vitalink.API.Services
         // ----------------------------------------------------
         public async Task SaveRefreshTokenAsync(AthleteProfile athlete, TokenResult refreshToken)
         {
-            // 1. إزالة أي توكنات تجديد قديمة لنفس المستخدم
+            // Remove any existing refresh tokens for the same user
             var existingTokens = _context.RefreshTokens
                 .Where(t => t.AthleteID == athlete.AthleteID);
             _context.RefreshTokens.RemoveRange(existingTokens);
 
-            // 2. إنشاء التوكن الجديد
+            // Create the new refresh token
             var newRefreshToken = new RefreshToken
             {
                 Token = refreshToken.Token,
@@ -108,11 +104,7 @@ namespace Vitalink.API.Services
             await _context.SaveChangesAsync();
         }
 
-        // ----------------------------------------------------
-        // 6 & 7: التحقق من الصلاحية وإنشاء DTO (تم ترك 6 كواجب منزلي)
-        // ----------------------------------------------------
-
-        // 7. تحويل النتيجة النهائية إلى DTO
+        // Create token response DTO
         public TokenResponseDto CreateTokenResponseDto(AthleteProfile athlete, TokenResult accessToken, TokenResult refreshToken)
         {
             return new TokenResponseDto

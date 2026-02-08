@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace VitaLink.Migrations
 {
     /// <inheritdoc />
-    public partial class AddSessionSummaryTable : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,16 +17,40 @@ namespace VitaLink.Migrations
                 {
                     AthleteID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Role = table.Column<int>(type: "int", nullable: false),
                     BirthDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Weight = table.Column<double>(type: "float", nullable: false),
                     BloodType = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     BodyFatPercentage = table.Column<double>(type: "float", nullable: false),
-                    TargetSport = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    TargetSport = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    BeltID = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AthleteProfiles", x => x.AthleteID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RefreshTokens",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Token = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    AthleteID = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RefreshTokens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RefreshTokens_AthleteProfiles_AthleteID",
+                        column: x => x.AthleteID,
+                        principalTable: "AthleteProfiles",
+                        principalColumn: "AthleteID",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -79,25 +103,24 @@ namespace VitaLink.Migrations
                 name: "SensorDataRaw",
                 columns: table => new
                 {
-                    DataID = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    HeartRate = table.Column<int>(type: "int", nullable: false),
-                    OxygenSaturation = table.Column<double>(type: "float", nullable: false),
-                    BodyTemperature = table.Column<double>(type: "float", nullable: false),
-                    SweatComposition = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    MotionData_X = table.Column<double>(type: "float", nullable: false),
-                    SessionID = table.Column<int>(type: "int", nullable: false)
+                    BeltID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    HeartRate = table.Column<float>(type: "real", nullable: false),
+                    Spo2 = table.Column<byte>(type: "tinyint", nullable: false),
+                    Temperature = table.Column<float>(type: "real", nullable: false),
+                    AccX = table.Column<float>(type: "real", nullable: false),
+                    AccY = table.Column<float>(type: "real", nullable: false),
+                    AccZ = table.Column<float>(type: "real", nullable: false),
+                    Sweat = table.Column<int>(type: "int", nullable: false),
+                    TrainingSessionSessionID = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SensorDataRaw", x => x.DataID);
+                    table.PrimaryKey("PK_SensorDataRaw", x => x.BeltID);
                     table.ForeignKey(
-                        name: "FK_SensorDataRaw_TrainingSessions_SessionID",
-                        column: x => x.SessionID,
+                        name: "FK_SensorDataRaw_TrainingSessions_TrainingSessionSessionID",
+                        column: x => x.TrainingSessionSessionID,
                         principalTable: "TrainingSessions",
-                        principalColumn: "SessionID",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "SessionID");
                 });
 
             migrationBuilder.CreateTable(
@@ -131,9 +154,21 @@ namespace VitaLink.Migrations
                 column: "SessionID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SensorDataRaw_SessionID",
+                name: "IX_AthleteProfiles_BeltID",
+                table: "AthleteProfiles",
+                column: "BeltID",
+                unique: true,
+                filter: "[BeltID] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RefreshTokens_AthleteID",
+                table: "RefreshTokens",
+                column: "AthleteID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SensorDataRaw_TrainingSessionSessionID",
                 table: "SensorDataRaw",
-                column: "SessionID");
+                column: "TrainingSessionSessionID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SessionSummaries_SessionID",
@@ -152,6 +187,9 @@ namespace VitaLink.Migrations
         {
             migrationBuilder.DropTable(
                 name: "AIRecommendations");
+
+            migrationBuilder.DropTable(
+                name: "RefreshTokens");
 
             migrationBuilder.DropTable(
                 name: "SensorDataRaw");

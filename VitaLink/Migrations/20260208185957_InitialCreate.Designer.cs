@@ -12,8 +12,8 @@ using VitaLink.Models.Data;
 namespace VitaLink.Migrations
 {
     [DbContext(typeof(VitalinkDbContext))]
-    [Migration("20251016113952_AddAuthTablesToDb")]
-    partial class AddAuthTablesToDb
+    [Migration("20260208185957_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -61,6 +61,9 @@ namespace VitaLink.Migrations
                     b.Property<string>("AthleteID")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("BeltID")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<DateTime>("BirthDate")
                         .HasColumnType("datetime2");
 
@@ -95,6 +98,10 @@ namespace VitaLink.Migrations
 
                     b.HasKey("AthleteID");
 
+                    b.HasIndex("BeltID")
+                        .IsUnique()
+                        .HasFilter("[BeltID] IS NOT NULL");
+
                     b.ToTable("AthleteProfiles");
                 });
 
@@ -126,37 +133,37 @@ namespace VitaLink.Migrations
 
             modelBuilder.Entity("Vitalink.Models.SensorDataRaw", b =>
                 {
-                    b.Property<long>("DataID")
+                    b.Property<string>("BeltID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("nvarchar(450)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("DataID"));
+                    b.Property<float>("AccX")
+                        .HasColumnType("real");
 
-                    b.Property<double>("BodyTemperature")
-                        .HasColumnType("float");
+                    b.Property<float>("AccY")
+                        .HasColumnType("real");
 
-                    b.Property<int>("HeartRate")
+                    b.Property<float>("AccZ")
+                        .HasColumnType("real");
+
+                    b.Property<float>("HeartRate")
+                        .HasColumnType("real");
+
+                    b.Property<byte>("Spo2")
+                        .HasColumnType("tinyint");
+
+                    b.Property<int>("Sweat")
                         .HasColumnType("int");
 
-                    b.Property<double>("MotionData_X")
-                        .HasColumnType("float");
+                    b.Property<float>("Temperature")
+                        .HasColumnType("real");
 
-                    b.Property<double>("OxygenSaturation")
-                        .HasColumnType("float");
-
-                    b.Property<int>("SessionID")
+                    b.Property<int?>("TrainingSessionSessionID")
                         .HasColumnType("int");
 
-                    b.Property<string>("SweatComposition")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasKey("BeltID");
 
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("DataID");
-
-                    b.HasIndex("SessionID");
+                    b.HasIndex("TrainingSessionSessionID");
 
                     b.ToTable("SensorDataRaw");
                 });
@@ -254,13 +261,9 @@ namespace VitaLink.Migrations
 
             modelBuilder.Entity("Vitalink.Models.SensorDataRaw", b =>
                 {
-                    b.HasOne("Vitalink.Models.TrainingSession", "TrainingSession")
+                    b.HasOne("Vitalink.Models.TrainingSession", null)
                         .WithMany("SensorDataRaw")
-                        .HasForeignKey("SessionID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("TrainingSession");
+                        .HasForeignKey("TrainingSessionSessionID");
                 });
 
             modelBuilder.Entity("Vitalink.Models.SessionSummary", b =>

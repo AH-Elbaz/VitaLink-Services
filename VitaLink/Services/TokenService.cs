@@ -22,7 +22,7 @@ namespace Vitalink.API.Services
             _context = context;
         }
 
-        // Password hashing and verification
+      
         public string HashPassword(string password)
         {
             return BCrypt.Net.BCrypt.HashPassword(password);
@@ -33,9 +33,7 @@ namespace Vitalink.API.Services
             return BCrypt.Net.BCrypt.Verify(password, hash);
         }
 
-        // ----------------------------------------------------
-        // 3: توليد Access Token (JWT)
-        // ----------------------------------------------------
+      
         public TokenResult GenerateAccessToken(AthleteProfile athlete)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
@@ -64,9 +62,7 @@ namespace Vitalink.API.Services
             };
         }
 
-        // ----------------------------------------------------
-        // 4: توليد Refresh Token (سلسلة عشوائية)
-        // ----------------------------------------------------
+    
         public TokenResult GenerateRefreshToken(AthleteProfile athlete)
         {
             var randomNumber = new byte[32];
@@ -82,17 +78,15 @@ namespace Vitalink.API.Services
             };
         }
 
-        // ----------------------------------------------------
-        // 5: حفظ Refresh Token في قاعدة البيانات
-        // ----------------------------------------------------
+       
         public async Task SaveRefreshTokenAsync(AthleteProfile athlete, TokenResult refreshToken)
         {
-            // Remove any existing refresh tokens for the same user
+          
             var existingTokens = _context.RefreshTokens
                 .Where(t => t.AthleteID == athlete.AthleteID);
             _context.RefreshTokens.RemoveRange(existingTokens);
 
-            // Create the new refresh token
+         
             var newRefreshToken = new RefreshToken
             {
                 Token = refreshToken.Token,
@@ -104,7 +98,7 @@ namespace Vitalink.API.Services
             await _context.SaveChangesAsync();
         }
 
-        // Create token response DTO
+    
         public TokenResponseDto CreateTokenResponseDto(AthleteProfile athlete, TokenResult accessToken, TokenResult refreshToken)
         {
             return new TokenResponseDto
@@ -117,8 +111,7 @@ namespace Vitalink.API.Services
             };
         }
 
-        // ** ملاحظة: تم ترك دالة ValidateRefreshTokenAsync غير مطبقة هنا **
-        // هذا الجزء ضروري لـ /refresh-token endpoint ولكن يمكن إضافته لاحقاً.
+      
         public Task<AthleteProfile?> ValidateRefreshTokenAsync(string refreshToken)
         {
             throw new NotImplementedException();

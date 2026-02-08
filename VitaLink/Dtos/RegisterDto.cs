@@ -26,7 +26,6 @@ namespace Vitalink.API.Dtos
         [StringLength(5)]
         public string? BloodType { get; set; }
 
-        public string? ProfileImageBase64 { get; set; }
 
         [StringLength(50)]
         public string? TargetSport { get; set; }

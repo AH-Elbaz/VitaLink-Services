@@ -58,9 +58,6 @@ namespace VitaLink.Migrations
                     b.Property<string>("AthleteID")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<Guid?>("AzurePersonId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("BeltID")
                         .HasColumnType("nvarchar(450)");
 

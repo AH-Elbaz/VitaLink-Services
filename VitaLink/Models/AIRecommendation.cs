@@ -1,4 +1,4 @@
-﻿// ملف: Models/AIRecommendation.cs
+﻿
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -16,7 +16,7 @@ namespace Vitalink.Models
         public string AlertMessage { get; set; }
 
 
-        // المفتاح الخارجي لربط التوصية بالجلسة التي حدثت فيها
+      
         public int SessionID { get; set; }
 
         [ForeignKey("SessionID")]

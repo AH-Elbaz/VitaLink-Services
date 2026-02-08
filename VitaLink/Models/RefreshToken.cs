@@ -1,4 +1,4 @@
-﻿// ملف: Models/RefreshToken.cs
+﻿
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Vitalink.Models;
@@ -16,7 +16,7 @@ namespace Vitalink.Models
         public DateTime ExpiryDate { get; set; }
 
         [Required]
-        public string AthleteID { get; set; } = null!; // FK
+        public string AthleteID { get; set; } = null!; 
 
         [ForeignKey("AthleteID")]
         public AthleteProfile Athlete { get; set; } = null!;

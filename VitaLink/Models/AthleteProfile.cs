@@ -1,4 +1,4 @@
-﻿// ملف: Models/AthleteProfile.cs
+﻿
 using System.ComponentModel.DataAnnotations;
 
 namespace Vitalink.Models
@@ -23,7 +23,7 @@ namespace Vitalink.Models
 
         public string? BeltID { get; set; }
 
-        public Guid? AzurePersonId { get; set; }
+        
 
         public ICollection<TrainingSession> TrainingSessions { get; set; } = new List<TrainingSession>();
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();

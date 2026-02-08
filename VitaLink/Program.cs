@@ -29,7 +29,7 @@ builder.Services.AddScoped<ISensorDataService, SensorDataService>();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 
-builder.Services.AddScoped<IFaceService, FaceService>();
+
 builder.Services.AddSignalR();
 
 

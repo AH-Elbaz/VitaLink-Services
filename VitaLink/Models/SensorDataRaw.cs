@@ -1,4 +1,4 @@
-// ملف: Models/SensorDataRaw.cs
+
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 

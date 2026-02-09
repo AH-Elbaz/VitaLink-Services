@@ -1,0 +1,40 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+bin/
+obj/
+
+# Rider
+.idea/
+
+# dotnet
+*.db
+*.sqlite
+
+# Resharper
+_ReSharper*/
+*.ReSharper*/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# npm
+node_modules/
+
+# JetBrains Rider
+.idea/
+
+# Coverage
+coverage/
+
+# Visual Studio Code
+.vscode/

@@ -72,6 +72,7 @@ namespace Vitalink.API.Controllers
         }
 
 
+
         [HttpPost("register")]
         [ProducesResponseType(typeof(AthleteProfile), 201)]
         [ProducesResponseType(400)]

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Linq;
@@ -13,7 +13,7 @@ namespace Vitalink.API.Hubs
     {
         private readonly ConnectionTracker _tracker;
         private readonly ISensorDataService _sensorDataService;
-        private readonly IDbContextFactory<VitalinkDbContext> _contextFactory; 
+        private readonly IDbContextFactory<VitalinkDbContext> _contextFactory;
 
         public SensorDataHub(ConnectionTracker tracker, ISensorDataService sensorDataService, IDbContextFactory<VitalinkDbContext> contextFactory)
         {
@@ -22,36 +22,44 @@ namespace Vitalink.API.Hubs
             _contextFactory = contextFactory;
         }
 
-
         public async Task RegisterConnection(string username)
         {
             _tracker.AddConnection(username, Context.ConnectionId);
             Debug.WriteLine($"[CONNECTION] User {username} registered ID: {Context.ConnectionId}");
         }
 
-
         public async Task SendSensorData(SensorDataDto data)
         {
             var incomingBeltId = data.BeltID;
-
-          
             string? targetUsername;
 
+            // 1. البحث عن المستخدم المرتبط بالحزام
             await using (var dbContext = _contextFactory.CreateDbContext())
             {
-            
                 targetUsername = await dbContext.AthleteProfiles
                                                 .Where(a => a.BeltID == incomingBeltId)
                                                 .Select(a => a.FirstName)
                                                 .FirstOrDefaultAsync();
             }
 
-
             if (targetUsername != null)
             {
-                 await _sensorDataService.SaveRowData(data);
-                var targetConnectionIds = _tracker.GetConnectionIds(targetUsername);
+                // 2. تشغيل عملية الحفظ في الخلفية لكي لا تعطل البث المباشر
+                // نستخدم Task.Run لضمان عدم انتظار الـ Stream لعملية الـ Database I/O
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await _sensorDataService.SaveRowData(data);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"[ERROR] Failed to save sensor data: {ex.Message}");
+                    }
+                });
 
+                // 3. إرسال التحديث المباشر فوراً
+                var targetConnectionIds = _tracker.GetConnectionIds(targetUsername);
                 if (targetConnectionIds.Any())
                 {
                     await Clients.Clients(targetConnectionIds.ToList()).SendAsync("ReceiveLiveUpdate", data);
@@ -68,7 +76,6 @@ namespace Vitalink.API.Hubs
             }
         }
 
-
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             _tracker.RemoveConnection(Context.ConnectionId);
@@ -77,3 +84,4 @@ namespace Vitalink.API.Hubs
         }
     }
 }
+

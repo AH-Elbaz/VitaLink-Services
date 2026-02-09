@@ -49,7 +49,7 @@ namespace Vitalink.API.Hubs
 
             if (targetUsername != null)
             {
-              
+                 await _sensorDataService.SaveRowData(data);
                 var targetConnectionIds = _tracker.GetConnectionIds(targetUsername);
 
                 if (targetConnectionIds.Any())

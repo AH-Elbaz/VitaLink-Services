@@ -6,20 +6,22 @@ using System.Threading.Tasks;
 using Vitalink.API.Dtos;
 using Vitalink.API.Services;
 using VitaLink.Models.Data;
+using Microsoft.Extensions.DependencyInjection; // Required for IServiceScopeFactory
+using System;
 
 namespace Vitalink.API.Hubs
 {
     public class SensorDataHub : Hub
     {
         private readonly ConnectionTracker _tracker;
-        private readonly ISensorDataService _sensorDataService;
         private readonly IDbContextFactory<VitalinkDbContext> _contextFactory;
+        private readonly IServiceScopeFactory _serviceScopeFactory; // Added IServiceScopeFactory
 
-        public SensorDataHub(ConnectionTracker tracker, ISensorDataService sensorDataService, IDbContextFactory<VitalinkDbContext> contextFactory)
+        public SensorDataHub(ConnectionTracker tracker, IDbContextFactory<VitalinkDbContext> contextFactory, IServiceScopeFactory serviceScopeFactory)
         {
             _tracker = tracker;
-            _sensorDataService = sensorDataService;
             _contextFactory = contextFactory;
+            _serviceScopeFactory = serviceScopeFactory; // Initialize IServiceScopeFactory
         }
 
         public async Task RegisterConnection(string username)
@@ -44,21 +46,7 @@ namespace Vitalink.API.Hubs
 
             if (targetUsername != null)
             {
-                // 2. تشغيل عملية الحفظ في الخلفية لكي لا تعطل البث المباشر
-                // نستخدم Task.Run لضمان عدم انتظار الـ Stream لعملية الـ Database I/O
-                _ = Task.Run(async () =>
-                {
-                    try
-                    {
-                        await _sensorDataService.SaveRowData(data);
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine($"[ERROR] Failed to save sensor data: {ex.Message}");
-                    }
-                });
-
-                // 3. إرسال التحديث المباشر فوراً
+                // 2. إرسال التحديث المباشر فوراً للمستخدمين المتصلين
                 var targetConnectionIds = _tracker.GetConnectionIds(targetUsername);
                 if (targetConnectionIds.Any())
                 {
@@ -69,6 +57,26 @@ namespace Vitalink.API.Hubs
                 {
                     Debug.WriteLine($"[WARNING] Data received for {targetUsername} but dashboard is not connected.");
                 }
+
+                // 3. تشغيل عملية الحفظ في الخلفية باستخدام نطاق خدمة خاص بها
+                // هذا يضمن أن الخدمات المحقونة (مثل DbContext و ISensorDataService) لها دورة حياة خاصة بها
+                // ولا تتأثر بدورة حياة الـ Hub المؤقتة.
+                _ = Task.Run(async () =>
+                {
+                    using (var scope = _serviceScopeFactory.CreateScope())
+                    {
+                        var sensorDataService = scope.ServiceProvider.GetRequiredService<ISensorDataService>();
+                        try
+                        {
+                            await sensorDataService.SaveRowData(data);
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"[ERROR] Failed to save sensor data in background: {ex.Message}");
+                            // يمكنك هنا إضافة المزيد من معالجة الأخطاء، مثل تسجيلها في نظام تسجيل الأخطاء
+                        }
+                    }
+                });
             }
             else
             {
@@ -84,4 +92,3 @@ namespace Vitalink.API.Hubs
         }
     }
 }
-

@@ -26,7 +26,7 @@ namespace Vitalink.API.Services
                     AccX = data.AccX,
                     AccY = data.AccY,
                     AccZ = data.AccZ,
-                    BeltID = Guid.NewGuid().ToString(),
+                    BeltID = data.BeltID,
                     Sweat = data.Sweat,
                     HeartRate = data.HeartRate,
                     Spo2 = data.Spo2,

@@ -161,9 +161,6 @@ namespace VitaLink.Migrations
                     b.Property<float>("Temperature")
                         .HasColumnType("real");
 
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2");
-
                     b.Property<int?>("TrainingSessionSessionID")
                         .HasColumnType("int");
 

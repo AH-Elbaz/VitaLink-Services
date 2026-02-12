@@ -19,7 +19,6 @@ namespace Vitalink.Models
         public float AccY { get; set; }
         public float AccZ { get; set; }
         public ushort Sweat { get; set; }
-        
-        public DateTime Timestamp { get; set; } = DateTime.UtcNow; // يفضل إضافة وقت القراءة
+     
     }
 }

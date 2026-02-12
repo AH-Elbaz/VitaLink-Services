@@ -103,7 +103,9 @@ namespace VitaLink.Migrations
                 name: "SensorDataRaw",
                 columns: table => new
                 {
-                    BeltID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    BeltID = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     HeartRate = table.Column<float>(type: "real", nullable: false),
                     Spo2 = table.Column<byte>(type: "tinyint", nullable: false),
                     Temperature = table.Column<float>(type: "real", nullable: false),
@@ -115,7 +117,7 @@ namespace VitaLink.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SensorDataRaw", x => x.BeltID);
+                    table.PrimaryKey("PK_SensorDataRaw", x => x.Id);
                     table.ForeignKey(
                         name: "FK_SensorDataRaw_TrainingSessions_TrainingSessionSessionID",
                         column: x => x.TrainingSessionSessionID,

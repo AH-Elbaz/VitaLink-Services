@@ -12,7 +12,7 @@ using VitaLink.Models.Data;
 namespace VitaLink.Migrations
 {
     [DbContext(typeof(VitalinkDbContext))]
-    [Migration("20260208185957_InitialCreate")]
+    [Migration("20260212144701_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -133,9 +133,11 @@ namespace VitaLink.Migrations
 
             modelBuilder.Entity("Vitalink.Models.SensorDataRaw", b =>
                 {
-                    b.Property<string>("BeltID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<float>("AccX")
                         .HasColumnType("real");
@@ -145,6 +147,10 @@ namespace VitaLink.Migrations
 
                     b.Property<float>("AccZ")
                         .HasColumnType("real");
+
+                    b.Property<string>("BeltID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<float>("HeartRate")
                         .HasColumnType("real");
@@ -161,7 +167,7 @@ namespace VitaLink.Migrations
                     b.Property<int?>("TrainingSessionSessionID")
                         .HasColumnType("int");
 
-                    b.HasKey("BeltID");
+                    b.HasKey("Id");
 
                     b.HasIndex("TrainingSessionSessionID");
 

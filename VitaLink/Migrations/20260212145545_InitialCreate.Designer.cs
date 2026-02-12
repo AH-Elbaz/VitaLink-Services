@@ -12,7 +12,7 @@ using VitaLink.Models.Data;
 namespace VitaLink.Migrations
 {
     [DbContext(typeof(VitalinkDbContext))]
-    [Migration("20260212144701_InitialCreate")]
+    [Migration("20260212145545_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

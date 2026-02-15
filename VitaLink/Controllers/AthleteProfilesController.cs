@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using VitaLink.Models.Data;
 using Vitalink.Models;
 using Vitalink.API.Dtos;
+using VitaLink.Models;
+using Dtos;
+
 
 
 namespace Vitalink.API.Controllers
@@ -20,7 +23,18 @@ namespace Vitalink.API.Controllers
             _context = context;
         }
 
-       
+        [HttpPost("userbilt")]
+        public async Task<ActionResult> postBuilt(UserBeltDto userBelt)
+        {
+            UserBelt newUserBelt = new UserBelt
+            {
+                BeltID = userBelt.BeltID,
+                AthleteID = userBelt.AthleteID
+            };
+            _context.UserBelts.Add(newUserBelt);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
         [HttpPost]
         public async Task<ActionResult<AthleteProfile>> PostAthleteProfile(AthleteProfile athleteProfile)
         {
@@ -32,10 +46,9 @@ namespace Vitalink.API.Controllers
          
             _context.AthleteProfiles.Add(athleteProfile);
 
-         
+        
             await _context.SaveChangesAsync();
 
-    
             return CreatedAtAction(nameof(GetAthleteProfile), new { id = athleteProfile.AthleteID }, athleteProfile);
         }
 
@@ -86,9 +99,9 @@ namespace Vitalink.API.Controllers
             {
                 return NotFound();
             }
+            var athe = await _context.AthleteProfiles.Include(a => a.UserBelts).ToListAsync();
 
-           
-            return await _context.AthleteProfiles.ToListAsync();
+            return athe;
         }
 
   
@@ -103,6 +116,14 @@ namespace Vitalink.API.Controllers
             }
 
             return athleteProfile;
+        }
+
+
+        [HttpGet("GetAllBelt")]
+        public async Task<ActionResult> getalldevices()
+        {
+            var devices = await _context.UserBelts.Select(a => a.BeltID).ToListAsync();
+            return Ok(devices);
         }
     }
 }

@@ -17,17 +17,9 @@ namespace Vitalink.API.Dtos
         public string Password { get; set; }
 
         [Required]
-        public DateTime BirthDate { get; set; }
+        public int role { get; set; }
 
-        public double Weight { get; set; }
-
-        public double BodyFatPercentage { get; set; }
-
-        [StringLength(5)]
-        public string? BloodType { get; set; }
-
-
-        [StringLength(50)]
-        public string? TargetSport { get; set; }
+     
+   
     }
 }

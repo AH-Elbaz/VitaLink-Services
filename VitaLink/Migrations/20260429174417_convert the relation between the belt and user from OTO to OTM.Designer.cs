@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VitaLink.Models.Data;
 
@@ -11,9 +12,11 @@ using VitaLink.Models.Data;
 namespace VitaLink.Migrations
 {
     [DbContext(typeof(VitalinkDbContext))]
-    partial class VitalinkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260429174417_convert the relation between the belt and user from OTO to OTM")]
+    partial class converttherelationbetweenthebeltanduserfromOTOtoOTM
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,30 +33,6 @@ namespace VitaLink.Migrations
                     b.Property<string>("AthleteID")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("BirthDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("BloodType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("BodyFatPercentage")
-                        .HasColumnType("float");
-
-                    b.Property<byte[]>("ProfileImage")
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("TargetSport")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("Weight")
-                        .HasColumnType("float");
-
-                    b.Property<string>("name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("BeltID");
 
@@ -101,6 +80,16 @@ namespace VitaLink.Migrations
                     b.Property<string>("AthleteID")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<DateTime>("BirthDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("BloodType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("BodyFatPercentage")
+                        .HasColumnType("float");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -115,6 +104,13 @@ namespace VitaLink.Migrations
 
                     b.Property<int>("Role")
                         .HasColumnType("int");
+
+                    b.Property<string>("TargetSport")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("Weight")
+                        .HasColumnType("float");
 
                     b.HasKey("AthleteID");
 
@@ -284,7 +280,7 @@ namespace VitaLink.Migrations
             modelBuilder.Entity("Vitalink.Models.RefreshToken", b =>
                 {
                     b.HasOne("Vitalink.Models.AthleteProfile", "Athlete")
-                        .WithMany()
+                        .WithMany("RefreshTokens")
                         .HasForeignKey("AthleteID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -313,7 +309,7 @@ namespace VitaLink.Migrations
             modelBuilder.Entity("Vitalink.Models.TrainingSession", b =>
                 {
                     b.HasOne("Vitalink.Models.AthleteProfile", "Athlete")
-                        .WithMany()
+                        .WithMany("TrainingSessions")
                         .HasForeignKey("AthleteID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -323,6 +319,10 @@ namespace VitaLink.Migrations
 
             modelBuilder.Entity("Vitalink.Models.AthleteProfile", b =>
                 {
+                    b.Navigation("RefreshTokens");
+
+                    b.Navigation("TrainingSessions");
+
                     b.Navigation("UserBelts");
                 });
 

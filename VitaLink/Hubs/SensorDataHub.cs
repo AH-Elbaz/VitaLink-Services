@@ -40,9 +40,9 @@ namespace Vitalink.API.Hubs
 
             await using (var dbContext = _contextFactory.CreateDbContext())
             {
-                targetUsername = await dbContext.AthleteProfiles
+                targetUsername = await dbContext.UserBelts
                                                 .Where(a => a.BeltID == incomingBeltId)
-                                                .Select(a => a.FirstName)
+                                                .Select(a => a.Athlete.FirstName)
                                                 .FirstOrDefaultAsync();
             }
 

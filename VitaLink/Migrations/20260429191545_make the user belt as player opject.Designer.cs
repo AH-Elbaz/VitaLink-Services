@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VitaLink.Models.Data;
 
@@ -11,9 +12,11 @@ using VitaLink.Models.Data;
 namespace VitaLink.Migrations
 {
     [DbContext(typeof(VitalinkDbContext))]
-    partial class VitalinkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260429191545_make the user belt as player opject")]
+    partial class maketheuserbeltasplayeropject
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

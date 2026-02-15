@@ -1,5 +1,6 @@
 ﻿
 using System.ComponentModel.DataAnnotations;
+using VitaLink.Models;
 
 namespace Vitalink.Models
 {
@@ -15,17 +16,10 @@ namespace Vitalink.Models
         public string PasswordHash { get; set; } = null!;
         public string LastName { get; set; }
         public int Role { get; set; } = 0;
-        public DateTime BirthDate { get; set; }
-        public double Weight { get; set; }
-        public string BloodType { get; set; }
-        public double BodyFatPercentage { get; set; }
-        public string TargetSport { get; set; }
 
-        public string? BeltID { get; set; }
 
-        
-
-        public ICollection<TrainingSession> TrainingSessions { get; set; } = new List<TrainingSession>();
-        public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+       
+        public ICollection<UserBelt> UserBelts { get; set; } = new List<UserBelt>();
+ 
     }
 }

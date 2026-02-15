@@ -14,8 +14,8 @@ namespace VitaLink.Models.Data
      
         public DbSet<AthleteProfile> AthleteProfiles { get; set; }
         public DbSet<TrainingSession> TrainingSessions { get; set; }
+        public DbSet<UserBelt> UserBelts { get; set; }
 
-      
 
         public DbSet<SensorDataRaw> SensorDataRaw { get; set; }
         public DbSet<AIRecommendation> AIRecommendations { get; set; }
@@ -27,19 +27,16 @@ namespace VitaLink.Models.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<AthleteProfile>()
-            .HasIndex(a => a.BeltID)
-            .IsUnique();
+            modelBuilder.Entity<UserBelt>()
+         .HasOne(b => b.Athlete)
+         .WithMany(a => a.UserBelts)
+         .HasForeignKey(b => b.AthleteID)
+         .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<AthleteProfile>()
-            .HasMany(a => a.RefreshTokens)
-            .WithOne(t => t.Athlete)
-            .HasForeignKey(t => t.AthleteID);
-            // تأكيد العلاقة بين الرياضي والتوكن
-            modelBuilder.Entity<AthleteProfile>()
-                .HasMany(a => a.RefreshTokens)
-                .WithOne(t => t.Athlete)
-                .HasForeignKey(t => t.AthleteID);
+            modelBuilder.Entity<UserBelt>()
+         .HasIndex(b => b.BeltID)
+         .IsUnique();
+
 
             base.OnModelCreating(modelBuilder);
         }

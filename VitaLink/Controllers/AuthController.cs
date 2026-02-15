@@ -97,13 +97,7 @@ namespace Vitalink.API.Controllers
                 FirstName = registerDto.FirstName,
                 LastName = registerDto.LastName,
                 PasswordHash = passwordHash,
-                Role = 0,
-                BirthDate = registerDto.BirthDate,
-                Weight = registerDto.Weight,
-                BodyFatPercentage = registerDto.BodyFatPercentage,
-                BloodType = registerDto.BloodType,
-                TargetSport = registerDto.TargetSport,
-               
+                Role = registerDto.role,  
             };
 
             _context.AthleteProfiles.Add(newAthlete);

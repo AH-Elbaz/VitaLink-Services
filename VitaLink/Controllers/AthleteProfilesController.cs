@@ -39,9 +39,45 @@ namespace Vitalink.API.Controllers
             return CreatedAtAction(nameof(GetAthleteProfile), new { id = athleteProfile.AthleteID }, athleteProfile);
         }
 
+        [HttpGet("sensorData")]
+        public async Task<ActionResult<IEnumerable<AthleteProfile>>> getRowData()
+        {
+            
+            if (_context.AthleteProfiles == null)
+            {
+                return NotFound();
+            }
+
+            var data = await _context.SensorDataRaw.Select(l => new SensorDataDto
+            {
+
+                BeltID = l.BeltID,
+                HeartRate = l.HeartRate,
+                Spo2 = l.Spo2,
+                Temperature = l.Temperature,
+                AccX = l.AccX,
+                AccY = l.AccY,
+                AccZ = l.AccZ,
+                Sweat = l.Sweat
+            }).ToListAsync();
+            return Ok(data);
+        }
+
+        [HttpDelete("delete")]
+
+      public async Task<IActionResult> DeleteSensorsData()
+        {
+            if (_context.SensorDataRaw == null)
+            {
+                return NotFound();
+            }
+            
+            _context.SensorDataRaw.RemoveRange(_context.SensorDataRaw);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
 
 
-     
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AthleteProfile>>> GetAthleteProfiles()
         {

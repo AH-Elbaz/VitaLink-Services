@@ -24,6 +24,30 @@ namespace Vitalink.API.Controllers
         }
 
 
+        [HttpGet("GetPlayerData")]
+        public async Task<ActionResult> getPlayerData(string id)
+        {
+            var playerData = await _context.UserBelts.FindAsync(id);
+            if (playerData == null)
+            {
+                return NotFound("Player data not found for the given ID.");
+            }
+            var responseDto = new UserBeltResponseDto
+            {
+                BeltID = playerData.BeltID,
+                AthleteID = playerData.AthleteID,
+                name = playerData.name,
+                ProfileImage = playerData.ProfileImage != null ? Convert.ToBase64String(playerData.ProfileImage) : null,
+                BirthDate = playerData.BirthDate,
+                Weight = playerData.Weight,
+                BloodType = playerData.BloodType,
+                BodyFatPercentage = playerData.BodyFatPercentage,
+                TargetSport = playerData.TargetSport
+            };
+            return Ok(responseDto);
+        }
+
+
         [HttpGet("Getuserbelt")]
         public async Task<ActionResult> getUserBelt(string name)
         {

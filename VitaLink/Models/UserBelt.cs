@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Vitalink.Models;
 
@@ -8,8 +9,11 @@ namespace VitaLink.Models
     {
         [Key]
         public string BeltID { get; set; }
+  
+
         [Required]
         public string name { get; set; }
+
         [Required]
         public string AthleteID { get; set; } 
 

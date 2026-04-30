@@ -55,19 +55,19 @@ namespace Vitalink.API.Controllers
             var athlete = await _context.AthleteProfiles
                 .FirstOrDefaultAsync(a => a.FirstName == credentials.Username);
 
-       
             if (athlete == null || !_tokenService.VerifyPassword(credentials.Password, athlete.PasswordHash))
             {
                 return Unauthorized(new { Message = "Invalid username or password." });
             }
 
-         
             var accessToken = _tokenService.GenerateAccessToken(athlete);
             var refreshToken = _tokenService.GenerateRefreshToken(athlete);
             await _tokenService.SaveRefreshTokenAsync(athlete, refreshToken);
 
-      
             var responseDto = _tokenService.CreateTokenResponseDto(athlete, accessToken, refreshToken);
+
+            responseDto.AthleteID = athlete.AthleteID;
+
             return Ok(responseDto);
         }
 

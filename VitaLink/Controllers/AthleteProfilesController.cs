@@ -23,18 +23,70 @@ namespace Vitalink.API.Controllers
             _context = context;
         }
 
-        [HttpPost("userbilt")]
-        public async Task<ActionResult> postBuilt(UserBeltDto userBelt)
+
+        [HttpGet("Getuserbelt")]
+        public async Task<ActionResult> getUserBelt(string name)
         {
+            var userBelts = await _context.UserBelts
+                .Include(ub => ub.Athlete)
+                .Where(ub => ub.Athlete.FirstName == name)
+                .Select(ub => new UserBeltResponseDto
+                {
+                    BeltID = ub.BeltID,
+                    AthleteID = ub.AthleteID,
+                    name = ub.name,
+                
+                    ProfileImage = ub.ProfileImage != null ? Convert.ToBase64String(ub.ProfileImage) : null,
+                    BirthDate = ub.BirthDate,
+                    Weight = ub.Weight,
+                    BloodType = ub.BloodType,
+                    BodyFatPercentage = ub.BodyFatPercentage,
+                    TargetSport = ub.TargetSport
+                })
+                .ToListAsync();
+
+            if (userBelts == null || !userBelts.Any())
+            {
+                return NotFound("No belts found for the given athlete name.");
+            }
+
+            return Ok(userBelts);
+        }
+
+
+        [HttpPost("userbilt")]
+
+        public async Task<ActionResult> postBuilt([FromForm] CreateUserBeltDto userBeltDto)
+        {
+            byte[]? imageBytes = null;
+
+            // ????? ??? IFormFile ??? byte[] ??????? ?? ????? ????????
+            if (userBeltDto.ProfileImage != null && userBeltDto.ProfileImage.Length > 0)
+            {
+                using var memoryStream = new MemoryStream();
+                await userBeltDto.ProfileImage.CopyToAsync(memoryStream);
+                imageBytes = memoryStream.ToArray();
+            }
+
             UserBelt newUserBelt = new UserBelt
             {
-                BeltID = userBelt.BeltID,
-                AthleteID = userBelt.AthleteID
+                BeltID = userBeltDto.BeltID,
+                AthleteID = userBeltDto.AthleteID,
+                name = userBeltDto.name,
+                ProfileImage = imageBytes, 
+                BirthDate = userBeltDto.BirthDate,
+                Weight = userBeltDto.Weight,
+                BloodType = userBeltDto.BloodType,
+                BodyFatPercentage = userBeltDto.BodyFatPercentage,
+                TargetSport = userBeltDto.TargetSport
             };
+
             _context.UserBelts.Add(newUserBelt);
             await _context.SaveChangesAsync();
-            return Ok();
+            return Ok("Belt created successfully.");
         }
+
+
         [HttpPost]
         public async Task<ActionResult<AthleteProfile>> PostAthleteProfile(AthleteProfile athleteProfile)
         {
@@ -122,7 +174,7 @@ namespace Vitalink.API.Controllers
         [HttpGet("GetAllBelt")]
         public async Task<ActionResult> getalldevices()
         {
-            var devices = await _context.UserBelts.Select(a => a.BeltID).ToListAsync();
+            var devices = await _context.UserBelts.ToListAsync();
             return Ok(devices);
         }
     }

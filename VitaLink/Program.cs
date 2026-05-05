@@ -29,6 +29,20 @@ builder.Services.AddDbContextFactory<VitalinkDbContext>(options =>
                 errorNumbersToAdd: null);
         }));
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins(
+                "http://localhost:3000",           // للتطوير المحلي
+                "https://vitalink-six.vercel.app" // الدومين الخاص بـ Vercel
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials(); // مهم جداً إذا كنت تستخدم Cookies أو Auth Headers
+    });
+});
+
 builder.Services.AddScoped<ISensorDataService, SensorDataService>();
 
 
@@ -38,16 +52,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddSignalR();
 
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAllOrigins", builder =>
-    {
-        builder.SetIsOriginAllowed(origin => true)
-               .AllowAnyMethod()
-               .AllowAnyHeader()
-               .AllowCredentials();
-    });
-});
+
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -78,7 +83,7 @@ builder.Services.AddSingleton<ConnectionTracker>();
 
 var app = builder.Build();
 
-app.UseCors("AllowAllOrigins");
+app.UseCors("AllowFrontend");
 
 app.UseSwagger();
 app.UseSwaggerUI();

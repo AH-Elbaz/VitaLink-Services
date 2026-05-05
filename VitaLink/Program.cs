@@ -11,48 +11,42 @@ using Vitalink.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. إعداد المتحكمات مع معالجة التكرار في JSON
+// 1. إعداد المتحكمات (مرة واحدة فقط)
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 
-// 2. إعداد قاعدة البيانات
+// 2. إعداد CORS للسماح لأي مصدر في العالم
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins", policy =>
+    {
+        policy.SetIsOriginAllowed(_ => true) // يسمح بأي Origin مهما كان
+              .AllowAnyMethod()              // يسمح بجميع الأفعال (GET, POST, etc.)
+              .AllowAnyHeader()              // يسمح بجميع الـ Headers
+              .AllowCredentials();           // ضروري جداً لعمل SignalR والـ Auth
+    });
+});
+
+// 3. قاعدة البيانات
 builder.Services.AddDbContextFactory<VitalinkDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
         sqlServerOptionsAction: sqlOptions =>
         {
-            sqlOptions.EnableRetryOnFailure(
-                maxRetryCount: 5,
-                maxRetryDelay: TimeSpan.FromSeconds(30),
-                errorNumbersToAdd: null);
+            sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(30), null);
         }));
 
-// 3. تصحيح كود الـ CORS (هنا كان الخطأ)
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFrontend", policy =>
-    {
-        policy.SetIsOriginAllowed(origin => 
-                new Uri(origin).Host.EndsWith("vercel.app") || 
-                origin == "http://localhost:3000")
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
-    });
-});
-
-// 4. تسجيل الخدمات (Dependency Injection)
+// 4. تسجيل الخدمات
 builder.Services.AddScoped<ISensorDataService, SensorDataService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddSingleton<ConnectionTracker>();
 builder.Services.AddSignalR();
-
-// 5. إعداد Swagger و Auth
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// 5. إعداد المصادقة (Authentication)
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -61,29 +55,29 @@ builder.Services.AddAuthentication(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        // تأكد أن هذه القيم موجودة في appsettings.json
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "YourDefaultFallbackKeyForDevelopment"))
     };
 });
 
 var app = builder.Build();
 
-// --- ترتيب الـ Middleware (مهم جداً) ---
+// --- ترتيب الـ Middleware (حرج جداً) ---
 
 app.UseSwagger();
 app.UseSwaggerUI();
 
+// 1. يجب أن يكون الـ CORS أول شيء تقريباً
+app.UseCors("AllowAllOrigins");
+
 app.UseHttpsRedirection();
 
-// يجب أن يكون الـ CORS قبل الـ Auth والـ Map
-app.UseCors("AllowFrontend");
-
+// 2. المصادقة يجب أن تأتي بعد الـ CORS وقبل الـ Map
 app.UseAuthentication();
 app.UseAuthorization();
 

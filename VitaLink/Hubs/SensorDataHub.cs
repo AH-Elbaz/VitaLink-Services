@@ -13,8 +13,6 @@ namespace Vitalink.API.Hubs
         private readonly ConnectionTracker _tracker;
         private readonly ISensorDataService _sensorDataService;
         private readonly IDbContextFactory<VitalinkDbContext> _contextFactory;
-
-        // قاموس لتخزين آخر قيم فعلية (غير صفرية) لكل حزام
         private static readonly ConcurrentDictionary<string, SensorDataDto> LastValidData = new ConcurrentDictionary<string, SensorDataDto>();
 
         public SensorDataHub(ConnectionTracker tracker, ISensorDataService sensorDataService, IDbContextFactory<VitalinkDbContext> contextFactory)
@@ -32,7 +30,6 @@ namespace Vitalink.API.Hubs
 
         public async Task SendSensorData(SensorDataDto data)
         {
-            // معالجة مشكلة الأصفار قبل الحفظ أو البث
             ProcessSensorZeros(data);
 
             var incomingBeltId = data.BeltID;

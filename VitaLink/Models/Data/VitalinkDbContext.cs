@@ -1,5 +1,4 @@
-﻿// ملف: Data/VitalinkDbContext.cs
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Vitalink.Models;
 
 namespace VitaLink.Models.Data

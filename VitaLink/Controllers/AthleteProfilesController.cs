@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VitaLink.Models.Data;
 using Vitalink.Models;
@@ -83,8 +83,6 @@ namespace Vitalink.API.Controllers
         public async Task<ActionResult> postBuilt([FromForm] CreateUserBeltDto userBeltDto)
         {
             byte[]? imageBytes = null;
-
-            // ????? ??? IFormFile ??? byte[] ??????? ?? ????? ????????
             if (userBeltDto.ProfileImage != null && userBeltDto.ProfileImage.Length > 0)
             {
                 using var memoryStream = new MemoryStream();

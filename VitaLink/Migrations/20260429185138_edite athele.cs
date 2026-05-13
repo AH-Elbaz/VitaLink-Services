@@ -5,10 +5,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VitaLink.Migrations
 {
-    /// <inheritdoc />
     public partial class editeathele : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
@@ -31,8 +29,6 @@ namespace VitaLink.Migrations
                 name: "Weight",
                 table: "AthleteProfiles");
         }
-
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<DateTime>(

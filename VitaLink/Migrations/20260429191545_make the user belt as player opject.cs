@@ -5,10 +5,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VitaLink.Migrations
 {
-    /// <inheritdoc />
     public partial class maketheuserbeltasplayeropject : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<DateTime>(
@@ -59,8 +57,6 @@ namespace VitaLink.Migrations
                 nullable: false,
                 defaultValue: "");
         }
-
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(

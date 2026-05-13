@@ -4,10 +4,8 @@
 
 namespace VitaLink.Migrations
 {
-    /// <inheritdoc />
     public partial class converttherelationbetweenthebeltanduserfromOTOtoOTM : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropIndex(
@@ -47,8 +45,6 @@ namespace VitaLink.Migrations
                 column: "BeltID",
                 unique: true);
         }
-
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

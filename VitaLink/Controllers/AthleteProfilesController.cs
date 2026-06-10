@@ -108,6 +108,19 @@ namespace Vitalink.API.Controllers
             return Ok("Belt created successfully.");
         }
 
+        [HttpDelete("deletebelt")]
+        public async Task<IActionResult> DeleteBelt(string id)
+        {
+            var belt = await _context.UserBelts.FindAsync(id);
+            if (belt == null)
+            {
+                return NotFound("Belt not found for the given ID.");
+            }
+            _context.UserBelts.Remove(belt);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
 
         [HttpPost]
         public async Task<ActionResult<AthleteProfile>> PostAthleteProfile(AthleteProfile athleteProfile)

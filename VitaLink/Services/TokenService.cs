@@ -46,7 +46,7 @@ namespace Vitalink.API.Services
                 new Claim(ClaimTypes.Role, athlete.Role.ToString())
             };
 
-            var expires = DateTime.UtcNow.AddMinutes(15);
+            var expires = DateTime.UtcNow.AddMinutes(1500);
 
             var token = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
